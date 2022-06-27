@@ -1,0 +1,131 @@
+# Copyright 2022 Hennadii Stepanov
+# Distributed under the MIT software license, see the accompanying
+# file COPYING or https://www.opensource.org/licenses/mit-license.php.
+
+cmake_minimum_required(VERSION 3.1)
+if(CMAKE_VERSION VERSION_GREATER 3.14)
+  # MSVC warning flags are not in CMAKE_<LANG>_FLAGS by default.
+  # See: https://cmake.org/cmake/help/latest/policy/CMP0092.html
+  cmake_policy(SET CMP0092 NEW)
+endif()
+project(secp256k1 VERSION 0.1.0 LANGUAGES C)
+
+set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_EXTENSIONS OFF)
+
+option(ENABLE_DEV_MODE "Enable all binaries and modules by default but individual options can still be overridden explicitly." OFF)
+
+option(BUILD_BENCHMARK "Build benchmarks." ON)
+option(BUILD_TESTS "Build tests." ON)
+option(BUILD_EXHAUSTIVE_TESTS "Build exhaustive tests." ON)
+option(BUILD_EXAMPLES "Build examples." ${ENABLE_DEV_MODE})
+
+option(ENABLE_MODULE_ECDH "Enable ECDH module." ${ENABLE_DEV_MODE})
+option(ENABLE_MODULE_RECOVERY "Enable ECDSA pubkey recovery module." ${ENABLE_DEV_MODE})
+option(ENABLE_MODULE_EXTRAKEYS "Enable extrakeys module." ${ENABLE_DEV_MODE})
+option(ENABLE_MODULE_SCHNORRSIG "Enable schnorrsig module." ${ENABLE_DEV_MODE})
+if(ENABLE_MODULE_SCHNORRSIG)
+  set(ENABLE_MODULE_EXTRAKEYS ON)
+endif()
+
+option(ALLOW_EXPERIMENTAL "Allow experimental configure options." ${ENABLE_DEV_MODE})
+option(USE_EXTERNAL_DEFAULT_CALLBACKS "Enable external default callback functions." OFF)
+option(COVERAGE "Enable compiler flags to support coverage analysis." OFF)
+if(COVERAGE)
+  string(STRIP "-O0 --coverage ${CMAKE_C_FLAGS}" CMAKE_C_FLAGS)
+  link_libraries(--coverage)
+else()
+  string(STRIP "-O2 ${CMAKE_C_FLAGS}" CMAKE_C_FLAGS)
+endif()
+
+set(ECMULT_WINDOW_SIZE auto CACHE STRING "Window size for ecmult precomputation for verification, specified as integer in range [2..24]. \"auto\" is a reasonable setting for desktop machines (currently 15). [default=auto]")
+if(ECMULT_WINDOW_SIZE STREQUAL auto)
+  set(ECMULT_WINDOW_SIZE 15)
+endif()
+if(NOT ECMULT_WINDOW_SIZE MATCHES ^[1-9][0-9]*$ OR ECMULT_WINDOW_SIZE LESS 2 OR ECMULT_WINDOW_SIZE GREATER 24)
+  message(FATAL_ERROR "ECMULT_WINDOW_SIZE value is \"${ECMULT_WINDOW_SIZE}\", but must an integer in range [2..24] or \"auto\".")
+endif()
+
+set(ECMULT_GEN_PREC_BITS auto CACHE STRING "Precision bits to tune the precomputed table size for signing, specified as integer 2, 4 or 8. \"auto\" is a reasonable setting for desktop machines (currently 4). [default=auto]")
+set_property(CACHE ECMULT_GEN_PREC_BITS PROPERTY STRINGS auto 2 4 8)
+if(ECMULT_GEN_PREC_BITS STREQUAL auto)
+  set(ECMULT_GEN_PREC_BITS 4)
+endif()
+if(NOT ECMULT_GEN_PREC_BITS STREQUAL 2 AND NOT ECMULT_GEN_PREC_BITS STREQUAL 4 AND NOT ECMULT_GEN_PREC_BITS STREQUAL 8)
+  message(FATAL_ERROR "ECMULT_GEN_PREC_BITS value is \"${ECMULT_GEN_PREC_BITS}\", but must an integer 2, 4, 8, or \"auto\".")
+endif()
+
+option(USE_FORCE_WIDEMUL_INT128 "Force the use of the (unsigned) __int128 based wide multiplication implementation." OFF)
+option(USE_FORCE_WIDEMUL_INT64 "Force the use of the (u)int64_t based wide multiplication implementation." OFF)
+if(USE_FORCE_WIDEMUL_INT128 AND USE_FORCE_WIDEMUL_INT64)
+  message(FATAL_ERROR "USE_FORCE_WIDEMUL_INT128 and USE_FORCE_WIDEMUL_INT64 cannot be enabled simultaneously.")
+endif()
+
+mark_as_advanced(FORCE
+  ENABLE_DEV_MODE
+  USE_FORCE_WIDEMUL_INT128
+  USE_FORCE_WIDEMUL_INT64
+)
+
+include(cmake/secp_try_append_cflag.cmake)
+secp_try_append_cflag(-pedantic)
+secp_try_append_cflag(-Wno-long-long)
+secp_try_append_cflag(-Wnested-externs)
+secp_try_append_cflag(-Wshadow)
+secp_try_append_cflag(-Wstrict-prototypes)
+secp_try_append_cflag(-Wundef)
+secp_try_append_cflag(-Wno-overlength-strings)
+secp_try_append_cflag(-Wall)
+secp_try_append_cflag(-Wno-unused-function)
+secp_try_append_cflag(-Wextra)
+secp_try_append_cflag(-Wcast-align)
+secp_try_append_cflag(-Wcast-align=strict)
+secp_try_append_cflag(-Wconditional-uninitialized)
+
+if(CMAKE_VERSION VERSION_GREATER 3.2)
+  # Honor visibility properties for all target types.
+  # See: https://cmake.org/cmake/help/latest/policy/CMP0063.html
+  cmake_policy(SET CMP0063 NEW)
+endif()
+set(CMAKE_C_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
+add_subdirectory(src)
+if(BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
+
+message("\n")
+message("Configure summary")
+message("=================")
+if(CMAKE_CROSSCOMPILING)
+  message("Cross compiling for ${CMAKE_SYSTEM_NAME}, ${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+message("Optional binaries:")
+message("  benchmark ........................ ${BUILD_BENCHMARK}")
+message("  tests ............................ ${BUILD_TESTS}")
+message("  exhaustive tests ................. ${BUILD_EXHAUSTIVE_TESTS}")
+message("  examples ......................... ${BUILD_EXAMPLES}")
+message("Optional modules:")
+message("  ECDH ............................. ${ENABLE_MODULE_ECDH}")
+message("  ECDSA pubkey recovery ............ ${ENABLE_MODULE_RECOVERY}")
+message("  extrakeys ........................ ${ENABLE_MODULE_EXTRAKEYS}")
+message("  schnorrsig ....................... ${ENABLE_MODULE_SCHNORRSIG}")
+message("Parameters:")
+message("  ecmult window size ............... ${ECMULT_WINDOW_SIZE}")
+message("  ecmult gen precision bits ........ ${ECMULT_GEN_PREC_BITS}")
+message("Optional features:")
+message("  external callbacks ............... ${USE_EXTERNAL_DEFAULT_CALLBACKS}")
+if(BUILD_TESTS OR BUILD_EXHAUSTIVE_TESTS)
+  message("  support coverage analysis ... ${COVERAGE}")
+endif()
+if(USE_FORCE_WIDEMUL_INT128)
+  message("  override wide multiplication ..... int128")
+endif()
+if(USE_FORCE_WIDEMUL_INT64)
+  message("  override wide multiplication ..... int64")
+endif()
+message("\n")
+message("CC:       ${CMAKE_C_COMPILER}")
+message("CFLAGS:   ${CMAKE_C_FLAGS}")
+message("\n")
