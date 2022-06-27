@@ -1,0 +1,55 @@
+/***********************************************************************
+ * Copyright (c) 2022                                                  *
+ * Distributed under the MIT software license, see the accompanying    *
+ * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
+ ***********************************************************************/
+
+#ifndef LIBSECP256K1_CONFIG_H
+
+#define LIBSECP256K1_CONFIG_H
+
+/* Define this symbol to enable the ECDH module */
+#cmakedefine ENABLE_MODULE_ECDH
+
+/* Define this symbol to enable the ECDSA pubkey recovery module */
+#cmakedefine ENABLE_MODULE_RECOVERY
+
+/* Define this symbol to enable the extrakeys module */
+#cmakedefine ENABLE_MODULE_EXTRAKEYS
+
+/* Define this symbol to enable the schnorrsig module */
+#cmakedefine ENABLE_MODULE_SCHNORRSIG
+
+/* Define this symbol if an external implementation of the default callbacks
+   is used */
+#cmakedefine USE_EXTERNAL_DEFAULT_CALLBACKS
+
+/* Define this symbol to compile out all VERIFY code */
+#cmakedefine COVERAGE
+
+/* Set window size for ecmult precomputation */
+#cmakedefine ECMULT_WINDOW_SIZE @ECMULT_WINDOW_SIZE@
+
+/* Set ecmult gen precision bits */
+#cmakedefine ECMULT_GEN_PREC_BITS @ECMULT_GEN_PREC_BITS@
+
+/* Define this symbol if valgrind is installed, and it supports the host
+   platform */
+#cmakedefine HAVE_VALGRIND
+
+/* Define this symbol to enable x86_64 assembly optimizations */
+#cmakedefine USE_ASM_X86_64
+
+/* Define this symbol if an external (non-inline) assembly implementation is
+   used */
+#cmakedefine USE_EXTERNAL_ASM
+
+/* Define this symbol to force the use of the (unsigned) __int128 based wide
+   multiplication implementation */
+#cmakedefine USE_FORCE_WIDEMUL_INT128
+
+/* Define this symbol to force the use of the (u)int64_t based wide
+   multiplication implementation */
+#cmakedefine USE_FORCE_WIDEMUL_INT64
+
+#endif /*LIBSECP256K1_CONFIG_H*/

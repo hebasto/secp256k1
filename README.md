@@ -57,10 +57,8 @@ Implementation details
   * Optional runtime blinding which attempts to frustrate differential power analysis.
   * The precomputed tables add and eventually subtract points for which no known scalar (secret key) is known, preventing even an attacker with control over the secret key used to control the data internally.
 
-Build steps
------------
-
-libsecp256k1 is built using autotools:
+Building with Autotools
+-----------------------
 
     $ ./autogen.sh
     $ ./configure
@@ -69,6 +67,58 @@ libsecp256k1 is built using autotools:
     $ sudo make install  # optional
 
 To compile optional modules (such as Schnorr signatures), you need to run `./configure` with additional flags (such as `--enable-module-schnorrsig`). Run `./configure --help` to see the full list of available flags.
+
+Building with CMake
+-------------------
+
+To maintain a pristine source tree, CMake encourages to perform an out-of-source build by using a separate dedicated build tree.
+
+### Building on POSIX systems
+
+    $ rm -rf build && mkdir build && cd build
+    $ cmake ..
+    $ make
+    $ sudo make install  # optional
+
+To adjust the build system configuration, the following options can be provided to `cmake` call:
+
+| Option | Default value | Description |
+|--------|:-------------:|-------------|
+| BUILD_BENCHMARK | ON | compile benchmark |
+| BUILD_TESTS | ON | compile tests |
+| BUILD_EXHAUSTIVE_TESTS | ON | compile exhaustive tests |
+| BUILD_EXAMPLES | OFF | compile examples |
+| ENABLE_MODULE_ECDH | OFF | enable ECDH module |
+| ENABLE_MODULE_RECOVERY | OFF | enable ECDSA pubkey recovery module |
+| ENABLE_MODULE_EXTRAKEYS | OFF |enable extrakeys module |
+| ENABLE_MODULE_SCHNORRSIG | OFF | enable schnorrsig module |
+
+For example:
+
+    $ cmake -DBUILD_BENCHMARK=OFF -DENABLE_MODULE_ECDH=ON ..
+
+### Cross compiling
+
+To alleviate cross compiling, preconfigured toolchain files are available in the `toolchain` directory.
+For example, to cross compile for Windows:
+
+    $ cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain/x86_64-w64-mingw32.cmake ..
+
+To compile for Android with NDK (not using a toolchain file, and assuming the `ANDROID_HOME` environment variable has been set):
+
+    $ cmake .. -DCMAKE_SYSTEM_NAME=Android -DCMAKE_ANDROID_ARCH_ABI=armeabi-v7a -DCMAKE_ANDROID_NDK="${ANDROID_HOME}/ndk/23.2.8568313"
+
+### Building on Windows
+
+To build on Windows with Visual Studio, a proper [generator](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html#visual-studio-generators) must be specified for a new build tree.
+
+The following example assumes using of Visual Studio 2022 and CMake v3.21+.
+
+In "Developer Command Prompt for VS 2022":
+
+    >rd /s /q build && mkdir build && cd build
+    >cmake -G "Visual Studio 17 2022" -A x64 -DBUILD_BENCHMARK=OFF ..
+    >cmake --build . --target ALL_BUILD --config Release -- /nologo
 
 Usage examples
 -----------
