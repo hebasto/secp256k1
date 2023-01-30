@@ -1,6 +1,7 @@
 #ifndef SECP256K1_INT128_H
 #define SECP256K1_INT128_H
 
+#include "int128_impl.h"
 #include "util.h"
 
 #if defined(SECP256K1_WIDEMUL_INT128)

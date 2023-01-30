@@ -378,6 +378,7 @@ static int secp256k1_fe_set_b32(secp256k1_fe *r, const unsigned char *a) {
 }
 
 /** Convert a field element to a 32-byte big endian value. Requires the input to be normalized */
+/* IWYU pragma: private, include "field.h" */
 static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a) {
 #ifdef VERIFY
     VERIFY_CHECK(a->normalized);

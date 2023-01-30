@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 /** A scalar modulo the group order of the secp256k1 curve. */
+/* IWYU pragma: private, include "scalar.h" */
 typedef uint32_t secp256k1_scalar;
 
 #define SECP256K1_SCALAR_CONST(d7, d6, d5, d4, d3, d2, d1, d0) (d0)

@@ -211,7 +211,7 @@ static void secp256k1_hmac_sha256_finalize(secp256k1_hmac_sha256 *hash, unsigned
     secp256k1_sha256_finalize(&hash->outer, out32);
 }
 
-
+/* IWYU pragma: private, include "hash.h" */
 static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha256 *rng, const unsigned char *key, size_t keylen) {
     secp256k1_hmac_sha256 hmac;
     static const unsigned char zero[1] = {0x00};
@@ -242,6 +242,7 @@ static void secp256k1_rfc6979_hmac_sha256_initialize(secp256k1_rfc6979_hmac_sha2
     rng->retry = 0;
 }
 
+/* IWYU pragma: private, include "hash.h" */
 static void secp256k1_rfc6979_hmac_sha256_generate(secp256k1_rfc6979_hmac_sha256 *rng, unsigned char *out, size_t outlen) {
     /* RFC6979 3.2.h. */
     static const unsigned char zero[1] = {0x00};
@@ -273,6 +274,7 @@ static void secp256k1_rfc6979_hmac_sha256_generate(secp256k1_rfc6979_hmac_sha256
     rng->retry = 1;
 }
 
+/* IWYU pragma: private, include "hash.h" */
 static void secp256k1_rfc6979_hmac_sha256_finalize(secp256k1_rfc6979_hmac_sha256 *rng) {
     memset(rng->k, 0, 32);
     memset(rng->v, 0, 32);

@@ -18,6 +18,7 @@
  *    imply normality.
  */
 
+#include "field_impl.h"
 #include "util.h"
 
 #if defined(SECP256K1_WIDEMUL_INT128)

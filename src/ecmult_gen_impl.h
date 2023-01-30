@@ -7,12 +7,14 @@
 #ifndef SECP256K1_ECMULT_GEN_IMPL_H
 #define SECP256K1_ECMULT_GEN_IMPL_H
 
-#include "util.h"
-#include "scalar.h"
-#include "group.h"
 #include "ecmult_gen.h"
+#include "group.h"
+#include "group_impl.h"
 #include "hash_impl.h"
 #include "precomputed_ecmult_gen.h"
+#include "scalar.h"
+#include "scalar_impl.h"
+#include "util.h"
 
 static void secp256k1_ecmult_gen_context_build(secp256k1_ecmult_gen_context *ctx) {
     secp256k1_ecmult_gen_blind(ctx, NULL);

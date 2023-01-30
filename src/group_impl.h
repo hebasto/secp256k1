@@ -101,6 +101,7 @@ static void secp256k1_ge_neg(secp256k1_ge *r, const secp256k1_ge *a) {
     secp256k1_fe_negate(&r->y, &r->y, 1);
 }
 
+/* IWYU pragma: private, include "group.h" */
 static void secp256k1_ge_set_gej(secp256k1_ge *r, secp256k1_gej *a) {
     secp256k1_fe z2, z3;
     r->infinity = a->infinity;

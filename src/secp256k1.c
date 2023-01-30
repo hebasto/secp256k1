@@ -17,25 +17,25 @@
 
 #define SECP256K1_BUILD
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "../include/secp256k1.h"
 #include "../include/secp256k1_preallocated.h"
 
-#include "assumptions.h"
+#include "assumptions.h" /* IWYU pragma: keep */
 #include "checkmem.h"
-#include "util.h"
-
-#include "field_impl.h"
-#include "scalar_impl.h"
-#include "group_impl.h"
-#include "ecmult_impl.h"
-#include "ecmult_const_impl.h"
-#include "ecmult_gen_impl.h"
 #include "ecdsa_impl.h"
 #include "eckey_impl.h"
-#include "hash_impl.h"
-#include "int128_impl.h"
+#include "ecmult_gen.h"
+#include "ecmult_gen_impl.h"
+#include "field.h"
+#include "group.h"
+#include "hash.h"
+#include "scalar.h"
 #include "scratch_impl.h"
 #include "selftest.h"
+#include "util.h"
 
 #ifdef SECP256K1_NO_BUILD
 # error "secp256k1.h processed without SECP256K1_BUILD defined while building secp256k1.c"
