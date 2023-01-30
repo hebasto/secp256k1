@@ -7,6 +7,9 @@ target_sources(precomputed PRIVATE
   precomputed_ecmult.c
   precomputed_ecmult_gen.c
 )
+set_target_properties(precomputed PROPERTIES
+  C_INCLUDE_WHAT_YOU_USE ""
+)
 set(internal_obj "$<TARGET_OBJECTS:precomputed>")
 
 if(USE_EXTERNAL_ASM AND USE_ASM_ARM)
