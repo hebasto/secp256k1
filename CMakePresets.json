@@ -1,0 +1,23 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      // Don't set "generator" here because developers should still be able to
+      // select their preferred generators. As a result we're affected by CMake
+      // bug https://gitlab.kitware.com/cmake/cmake/-/issues/23341, which means
+      // that dev-mode is not selectable in cmake-gui. But in our case, that's
+      // probably rather a feature than a bug.
+      "name": "dev-mode",
+      "displayName": "Development mode (intended only for developers of the library)",
+      "cacheVariables": {
+        "SECP256K1_EXPERIMENTAL": "ON",
+        "SECP256K1_ENABLE_MODULE_RECOVERY": "ON",
+        "SECP256K1_BUILD_EXAMPLES": "ON"
+      },
+      "warnings": {
+        "dev": true,
+        "uninitialized": true
+      }
+    }
+  ]
+}
