@@ -3,17 +3,21 @@
  * Distributed under the MIT software license, see the accompanying    *
  * file COPYING or https://www.opensource.org/licenses/mit-license.php.*
  ***********************************************************************/
+#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "secp256k1.c"
-#include "../include/secp256k1.h"
 
-#include "util.h"
+#include "group.h"
+#include "hash.h"
+#include "scalar.h"
+
 #include "hash_impl.h"
-#include "field_impl.h"
 #include "group_impl.h"
 #include "scalar_impl.h"
 #include "ecmult_const_impl.h"
+#include "ecmult_gen_impl.h"
 #include "ecmult_impl.h"
 #include "bench.h"
 
