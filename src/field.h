@@ -20,6 +20,7 @@
 
 #include "util.h"
 
+/* IWYU pragma: begin_exports */
 #if defined(SECP256K1_WIDEMUL_INT128)
 #include "field_5x52.h"
 #elif defined(SECP256K1_WIDEMUL_INT64)
@@ -27,6 +28,7 @@
 #else
 #error "Please select wide multiplication implementation"
 #endif
+/* IWYU pragma: end_exports */
 
 static const secp256k1_fe secp256k1_fe_one = SECP256K1_FE_CONST(0, 0, 0, 0, 0, 0, 0, 1);
 static const secp256k1_fe secp256k1_const_beta = SECP256K1_FE_CONST(

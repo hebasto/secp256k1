@@ -9,6 +9,7 @@
 
 #include "util.h"
 
+/* IWYU pragma: begin_exports */
 #if defined(EXHAUSTIVE_TEST_ORDER)
 #include "scalar_low.h"
 #elif defined(SECP256K1_WIDEMUL_INT128)
@@ -18,6 +19,7 @@
 #else
 #error "Please select wide multiplication implementation"
 #endif
+/* IWYU pragma: end_exports */
 
 /** Clear a scalar to prevent the leak of sensitive data. */
 static void secp256k1_scalar_clear(secp256k1_scalar *r);

@@ -11,7 +11,7 @@
 #include "scalar.h"
 #include "field.h"
 #include "group.h"
-#include "ecmult.h"
+#include "ecmult_impl.h"
 #include "ecmult_gen.h"
 #include "ecdsa.h"
 

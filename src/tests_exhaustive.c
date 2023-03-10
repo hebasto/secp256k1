@@ -19,6 +19,7 @@
 #include "group.h"
 #include "testrand_impl.h"
 #include "ecmult_compute_table_impl.h"
+#include "ecmult_const_impl.h"
 #include "ecmult_gen_compute_table_impl.h"
 #include "util.h"
 

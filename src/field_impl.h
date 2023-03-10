@@ -9,6 +9,7 @@
 
 #include "util.h"
 
+/* IWYU pragma: begin_exports */
 #if defined(SECP256K1_WIDEMUL_INT128)
 #include "field_5x52_impl.h"
 #elif defined(SECP256K1_WIDEMUL_INT64)
@@ -16,6 +17,7 @@
 #else
 #error "Please select wide multiplication implementation"
 #endif
+/* IWYU pragma: end_exports */
 
 SECP256K1_INLINE static int secp256k1_fe_equal(const secp256k1_fe *a, const secp256k1_fe *b) {
     secp256k1_fe na;

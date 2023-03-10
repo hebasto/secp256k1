@@ -14,6 +14,7 @@
 #include "scalar.h"
 #include "util.h"
 
+/* IWYU pragma: begin_exports */
 #if defined(EXHAUSTIVE_TEST_ORDER)
 #include "scalar_low_impl.h"
 #elif defined(SECP256K1_WIDEMUL_INT128)
@@ -23,6 +24,7 @@
 #else
 #error "Please select wide multiplication implementation"
 #endif
+/* IWYU pragma: end_exports */
 
 static const secp256k1_scalar secp256k1_scalar_one = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 1);
 static const secp256k1_scalar secp256k1_scalar_zero = SECP256K1_SCALAR_CONST(0, 0, 0, 0, 0, 0, 0, 0);
