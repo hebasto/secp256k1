@@ -11,11 +11,25 @@ else()
   set(common_obj "")
 endif()
 
-add_library(precomputed OBJECT
-  precomputed_ecmult.c
-  precomputed_ecmult_gen.c
-)
-set(internal_obj "$<TARGET_OBJECTS:precomputed>" "${common_obj}")
+if(SECP256K1_BUILD_SHARED)
+  add_library(precomputed_for_shared OBJECT
+    precomputed_ecmult.c
+    precomputed_ecmult_gen.c
+  )
+endif()
+
+if(SECP256K1_BUILD_STATIC)
+  add_library(precomputed_for_static OBJECT
+    precomputed_ecmult.c
+    precomputed_ecmult_gen.c
+  )
+endif()
+
+if(SECP256K1_BUILD_SHARED)
+  set(internal_obj "$<TARGET_OBJECTS:precomputed_for_shared>" "${common_obj}")
+elseif(SECP256K1_BUILD_STATIC)
+  set(internal_obj "$<TARGET_OBJECTS:precomputed_for_static>" "${common_obj}")
+endif()
 
 add_library(secp256k1 SHARED EXCLUDE_FROM_ALL
   secp256k1.c
@@ -33,7 +47,7 @@ set_target_properties(secp256k1 PROPERTIES
 )
 if(SECP256K1_BUILD_SHARED)
   get_target_property(use_pic secp256k1 POSITION_INDEPENDENT_CODE)
-  set_target_properties(precomputed PROPERTIES POSITION_INDEPENDENT_CODE ${use_pic})
+  set_target_properties(precomputed_for_shared PROPERTIES POSITION_INDEPENDENT_CODE ${use_pic})
   set_target_properties(secp256k1 PROPERTIES EXCLUDE_FROM_ALL FALSE)
   list(APPEND ${PROJECT_NAME}_installables secp256k1)
 endif()
