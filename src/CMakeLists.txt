@@ -32,8 +32,9 @@ set_target_properties(secp256k1 PROPERTIES
   SOVERSION "${${PROJECT_NAME}_LIB_VERSION_CURRENT}"
 )
 if(MSVC)
+  math(EXPR dll_version "${${PROJECT_NAME}_LIB_VERSION_CURRENT} - ${${PROJECT_NAME}_LIB_VERSION_AGE}")
   set_target_properties(secp256k1 PROPERTIES
-    OUTPUT_NAME ${PROJECT_NAME}
+    OUTPUT_NAME ${PROJECT_NAME}-${dll_version}
   )
 endif()
 if(SECP256K1_BUILD_SHARED)
