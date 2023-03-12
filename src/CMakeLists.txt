@@ -141,7 +141,7 @@ configure_package_config_file(
   NO_SET_AND_CHECK_MACRO
 )
 write_basic_package_version_file(${PROJECT_NAME}-config-version.cmake
-  COMPATIBILITY SameMajorVersion
+  COMPATIBILITY SameMinorVersion
 )
 install(
   FILES
