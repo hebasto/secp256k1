@@ -184,20 +184,22 @@ endif()
 
 include(TryAppendCflags)
 if(MSVC)
-  try_append_cflags(/W2)
-  try_append_cflags(/wd4146)
+  # Keep the following commands ordered lexicographically.
+  try_append_cflags(/W2) # Moderate warning level.
+  try_append_cflags(/wd4146) # Disable warning C4146 "unary minus operator applied to unsigned type, result still unsigned".
 else()
+  # Keep the following commands ordered lexicographically.
   try_append_cflags(-pedantic)
-  try_append_cflags(-Wall)
-  try_append_cflags(-Wcast-align)
-  try_append_cflags(-Wcast-align=strict)
-  try_append_cflags(-Wconditional-uninitialized)
-  try_append_cflags(-Wextra)
+  try_append_cflags(-Wall) # GCC >= 2.95 and probably many other compilers.
+  try_append_cflags(-Wcast-align) # GCC >= 2.95.
+  try_append_cflags(-Wcast-align=strict) # GCC >= 8.0.
+  try_append_cflags(-Wconditional-uninitialized) # Clang >= 3.0 only.
+  try_append_cflags(-Wextra) # GCC >= 3.4, this is the newer name of -W, which we don't use because older GCCs will warn about unused functions.
   try_append_cflags(-Wnested-externs)
-  try_append_cflags(-Wno-long-long)
-  try_append_cflags(-Wno-overlength-strings)
-  try_append_cflags(-Wno-unused-function)
-  try_append_cflags(-Wreserved-identifier)
+  try_append_cflags(-Wno-long-long) # GCC >= 3.0, -Wlong-long is implied by -pedantic.
+  try_append_cflags(-Wno-overlength-strings) # GCC >= 4.2, -Woverlength-strings is implied by -pedantic.
+  try_append_cflags(-Wno-unused-function) # GCC >= 3.0, -Wunused-function is implied by -Wall.
+  try_append_cflags(-Wreserved-identifier) # Clang >= 13.0 only.
   try_append_cflags(-Wshadow)
   try_append_cflags(-Wstrict-prototypes)
   try_append_cflags(-Wundef)
