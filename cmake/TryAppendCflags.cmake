@@ -1,7 +1,7 @@
 include(CheckCCompilerFlag)
 
 # Append flags to the COMPILE_OPTIONS directory property if CC accepts them.
-macro(try_add_compile_option)
+macro(try_append_cflags)
   check_cflags_internal("${ARGV}" result)
   if(result)
     add_compile_options(${ARGV})
