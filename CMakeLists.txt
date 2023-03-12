@@ -165,7 +165,7 @@ mark_as_advanced(
   CMAKE_SHARED_LINKER_FLAGS_COVERAGE
 )
 
-if(CMAKE_CONFIGURATION_TYPES)
+if(GENERATOR_IS_MULTI_CONFIG)
   set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo" "Release" "Debug" "MinSizeRel" "Coverage")
 endif()
 
@@ -177,7 +177,7 @@ if(cached_cmake_build_type)
 endif()
 
 set(default_build_type "RelWithDebInfo")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT CMAKE_BUILD_TYPE AND NOT GENERATOR_IS_MULTI_CONFIG)
   message(STATUS "Setting build type to \"${default_build_type}\" as none was specified")
   set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE)
 endif()
@@ -268,7 +268,7 @@ message("CFLAGS ................................ ${CMAKE_C_FLAGS}")
 get_directory_property(compile_options COMPILE_OPTIONS)
 string(REPLACE ";" " " compile_options "${compile_options}")
 message("Compile options ....................... " ${compile_options})
-if(DEFINED CMAKE_BUILD_TYPE)
+if(NOT GENERATOR_IS_MULTI_CONFIG)
   message("Build type:")
   message(" - CMAKE_BUILD_TYPE ................... ${CMAKE_BUILD_TYPE}")
   string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
