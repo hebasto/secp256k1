@@ -92,7 +92,7 @@ AC_DEFUN([SECP_TRY_APPEND_DEFAULT_CFLAGS], [
       # not error out if it gets unknown warning flags and the checks here will always succeed
       # no matter if clang knows the flag or not.
       SECP_TRY_APPEND_DEFAULT_CFLAGS_saved_CFLAGS="$CFLAGS"
-      SECP_TRY_APPEND_CFLAGS([-Werror=unknown-warning-option], CFLAGS)
+      SECP_TRY_APPEND_CFLAGS([-Werror], CFLAGS)
 
       SECP_TRY_APPEND_CFLAGS([-std=c89 -pedantic -Wno-long-long -Wnested-externs -Wshadow -Wstrict-prototypes -Wundef], $1) # GCC >= 3.0, -Wlong-long is implied by -pedantic.
       SECP_TRY_APPEND_CFLAGS([-Wno-overlength-strings], $1) # GCC >= 4.2, -Woverlength-strings is implied by -pedantic.
