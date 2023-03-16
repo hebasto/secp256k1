@@ -10,14 +10,12 @@ add_library(secp_precomputed_objs OBJECT EXCLUDE_FROM_ALL
 # from being exported.
 add_library(secp256k1 secp256k1.c $<TARGET_OBJECTS:secp_precomputed_objs>)
 
-add_library(secp_asm INTERFACE)
 if(SECP256K1_ASM STREQUAL "arm")
   add_library(secp_asm_arm OBJECT EXCLUDE_FROM_ALL)
   target_sources(secp_asm_arm PUBLIC
     asm/field_10x26_arm.s
   )
   target_sources(secp256k1 PRIVATE $<TARGET_OBJECTS:secp_asm_arm>)
-  target_link_libraries(secp_asm INTERFACE secp_asm_arm)
 endif()
 
 #Define our export symbol only for Win32 and only for shared libs.
@@ -38,23 +36,29 @@ set_target_properties(secp256k1 PROPERTIES
   SOVERSION "${${PROJECT_NAME}_LIB_VERSION_CURRENT}"
 )
 
+add_library(secp256k1_internal INTERFACE)
+set_property(TARGET secp256k1_internal PROPERTY INTERFACE_SOURCES
+  $<TARGET_OBJECTS:secp_precomputed_objs>
+  $<$<TARGET_EXISTS:secp_asm_arm>:$<TARGET_OBJECTS:secp_asm_arm>>
+)
+
 if(SECP256K1_BUILD_BENCHMARK)
   add_executable(bench bench.c)
   target_link_libraries(bench secp256k1)
   add_executable(bench_internal bench_internal.c)
-  target_link_libraries(bench_internal secp_precomputed_objs secp_asm)
+  target_link_libraries(bench_internal secp256k1_internal)
   add_executable(bench_ecmult bench_ecmult.c)
-  target_link_libraries(bench_ecmult secp_precomputed_objs secp_asm)
+  target_link_libraries(bench_ecmult secp256k1_internal)
 endif()
 
 if(SECP256K1_BUILD_TESTS)
   add_executable(noverify_tests tests.c)
-  target_link_libraries(noverify_tests secp_precomputed_objs secp_asm)
+  target_link_libraries(noverify_tests secp256k1_internal)
   add_test(noverify_tests noverify_tests)
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
     target_compile_definitions(tests PRIVATE VERIFY)
-    target_link_libraries(tests secp_precomputed_objs secp_asm)
+    target_link_libraries(tests secp256k1_internal)
     add_test(tests tests)
   endif()
 endif()
@@ -62,7 +66,7 @@ endif()
 if(SECP256K1_BUILD_EXHAUSTIVE_TESTS)
   # Note: do not include secp_precomputed_objs in exhaustive_tests (it uses runtime-generated tables).
   add_executable(exhaustive_tests tests_exhaustive.c)
-  target_link_libraries(exhaustive_tests secp_asm)
+  target_link_libraries(exhaustive_tests $<TARGET_NAME_IF_EXISTS:secp_asm_arm>)
   target_compile_definitions(exhaustive_tests PRIVATE $<$<NOT:$<CONFIG:Coverage>>:VERIFY>)
   add_test(exhaustive_tests exhaustive_tests)
 endif()
