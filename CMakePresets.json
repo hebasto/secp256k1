@@ -18,6 +18,17 @@
         "dev": true,
         "uninitialized": true
       }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Build for coverage analysis",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_C_FLAGS": "-DCOVERAGE=1 -g -O0 --coverage",
+        "CMAKE_BUILD_TYPE": "None",
+        "SECP256K1_BUILD_VERIFY_TESTS": "OFF"
+      }
     }
   ]
 }

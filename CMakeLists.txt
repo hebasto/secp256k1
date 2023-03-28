@@ -128,6 +128,8 @@ endif()
 
 option(SECP256K1_BUILD_BENCHMARK "Build benchmarks." ON)
 option(SECP256K1_BUILD_TESTS "Build tests." ON)
+option(SECP256K1_BUILD_VERIFY_TESTS "Build tests with -DVERIFY." ${SECP256K1_BUILD_TESTS})
+mark_as_advanced(SECP256K1_BUILD_VERIFY_TESTS)
 option(SECP256K1_BUILD_EXHAUSTIVE_TESTS "Build exhaustive tests." ON)
 option(SECP256K1_BUILD_CTIME_TESTS "Build constant-time tests." ${SECP256K1_VALGRIND})
 option(SECP256K1_BUILD_EXAMPLES "Build examples." OFF)
@@ -146,33 +148,14 @@ else()
   string(REGEX REPLACE "-O3[ \t\r\n]*" "-O2" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
 
-# Define custom "Coverage" build type.
-set(CMAKE_C_FLAGS_COVERAGE "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O0 -DCOVERAGE=1 --coverage" CACHE STRING
-  "Flags used by the C compiler during \"Coverage\" builds."
-  FORCE
-)
-set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
-  "Flags used for linking binaries during \"Coverage\" builds."
-  FORCE
-)
-set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
-  "Flags used by the shared libraries linker during \"Coverage\" builds."
-  FORCE
-)
-mark_as_advanced(
-  CMAKE_C_FLAGS_COVERAGE
-  CMAKE_EXE_LINKER_FLAGS_COVERAGE
-  CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-)
-
 if(CMAKE_CONFIGURATION_TYPES)
-  set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo" "Release" "Debug" "MinSizeRel" "Coverage")
+  set(CMAKE_CONFIGURATION_TYPES "RelWithDebInfo" "Release" "Debug" "MinSizeRel")
 endif()
 
 get_property(cached_cmake_build_type CACHE CMAKE_BUILD_TYPE PROPERTY TYPE)
 if(cached_cmake_build_type)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-    STRINGS "RelWithDebInfo" "Release" "Debug" "MinSizeRel" "Coverage"
+    STRINGS "RelWithDebInfo" "Release" "Debug" "MinSizeRel"
   )
 endif()
 
@@ -244,11 +227,7 @@ endif()
 message("Optional binaries:")
 message("  benchmark ........................... ${SECP256K1_BUILD_BENCHMARK}")
 message("  noverify_tests ...................... ${SECP256K1_BUILD_TESTS}")
-set(tests_status "${SECP256K1_BUILD_TESTS}")
-if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
-  set(tests_status OFF)
-endif()
-message("  tests ............................... ${tests_status}")
+message("  tests ............................... ${SECP256K1_BUILD_VERIFY_TESTS}")
 message("  exhaustive tests .................... ${SECP256K1_BUILD_EXHAUSTIVE_TESTS}")
 message("  ctime_tests ......................... ${SECP256K1_BUILD_CTIME_TESTS}")
 message("  examples ............................ ${SECP256K1_BUILD_EXAMPLES}")
