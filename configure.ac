@@ -57,7 +57,7 @@ case $host_os in
          # Homebrew where each one is located, then adjust paths accordingly.
          if $BREW list --versions valgrind >/dev/null; then
            valgrind_prefix=$($BREW --prefix valgrind 2>/dev/null)
-           VALGRIND_CPPFLAGS="-I$valgrind_prefix/include"
+           VALGRIND_CPPFLAGS="-nostdinc -isystem $valgrind_prefix/include"
          fi
        else
          AC_CHECK_PROG([PORT], port, port)
