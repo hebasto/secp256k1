@@ -17,7 +17,9 @@
  */
 
 #if defined(_WIN32)
+#define WIN32_NO_STATUS
 #include <windows.h>
+#undef WIN32_NO_STATUS
 #include <ntstatus.h>
 #include <bcrypt.h>
 #elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
