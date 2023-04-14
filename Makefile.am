@@ -71,9 +71,11 @@ noinst_HEADERS += contrib/lax_der_privatekey_parsing.h
 noinst_HEADERS += contrib/lax_der_privatekey_parsing.c
 noinst_HEADERS += examples/examples_util.h
 
+PRECOMP = $(abs_top_builddir)/src/precomputed_ecmult_gen.c $(abs_top_builddir)/src/precomputed_ecmult.c
+
 PRECOMPUTED_LIB = libsecp256k1_precomputed.la
 noinst_LTLIBRARIES = $(PRECOMPUTED_LIB)
-libsecp256k1_precomputed_la_SOURCES =  src/precomputed_ecmult.c src/precomputed_ecmult_gen.c
+libsecp256k1_precomputed_la_SOURCES = $(PRECOMP)
 # We need `-I$(top_srcdir)/src` in VPATH builds if libsecp256k1_precomputed_la_SOURCES have been recreated in the build tree.
 # This helps users and packagers who insist on recreating the precomputed files (e.g., Gentoo).
 libsecp256k1_precomputed_la_CPPFLAGS = -I$(top_srcdir)/src $(SECP_CONFIG_DEFINES)
@@ -203,19 +205,14 @@ precompute_ecmult_gen_LDADD = $(COMMON_LIB)
 # build by a normal user) depends on mtimes, and thus is very fragile.
 # This means that rebuilds of the prebuilt files always need to be
 # forced by deleting them, e.g., by invoking `make clean-precomp`.
-src/precomputed_ecmult.c:
+$(abs_top_builddir)/src/precomputed_ecmult.c:
 	$(MAKE) $(AM_MAKEFLAGS) precompute_ecmult$(EXEEXT)
 	./precompute_ecmult$(EXEEXT)
-src/precomputed_ecmult_gen.c:
+$(abs_top_builddir)/src/precomputed_ecmult_gen.c:
 	$(MAKE) $(AM_MAKEFLAGS) precompute_ecmult_gen$(EXEEXT)
 	./precompute_ecmult_gen$(EXEEXT)
 
-PRECOMP = src/precomputed_ecmult_gen.c src/precomputed_ecmult.c
 precomp: $(PRECOMP)
-
-# Ensure the prebuilt files will be build first (only if they don't exist,
-# e.g., after `make maintainer-clean`).
-BUILT_SOURCES = $(PRECOMP)
 
 maintainer-clean-local: clean-precomp
 
