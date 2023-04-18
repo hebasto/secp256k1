@@ -20,7 +20,10 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         gcc-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-dbg:ppc64el \
         gcc-mingw-w64-x86-64-win32 wine64 wine \
         gcc-mingw-w64-i686-win32 wine32 \
+        python \
         sagemath
+
+RUN python3 -m pip install "lief>=0.13.0"
 
 WORKDIR /root
 # The "wine" package provides a convience wrapper that we need

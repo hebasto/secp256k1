@@ -95,6 +95,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -113,6 +115,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -137,9 +141,13 @@ task:
         CC: clang
   brew_script:
     - brew install automake libtool gcc
+  python_script:
+    - python3 -m pip install "lief>=0.13.0"
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.dylib
   << : *CAT_LOGS
   << : *CREDITS
 
@@ -160,6 +168,8 @@ task:
     # https://sourceware.org/bugzilla/show_bug.cgi?id=27008
     - rm /etc/ld.so.cache
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -180,6 +190,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -197,6 +209,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -214,6 +228,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -235,6 +251,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1-2.dll
   << : *CAT_LOGS
 
 task:
@@ -277,6 +295,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/secp256k1-2.dll
   << : *CAT_LOGS
 
 # Sanitizers
@@ -388,19 +408,24 @@ task:
     cpu: 4
     memory: 3840MB
   env:
-    PATH: '%CIRRUS_WORKING_DIR%\build\src\RelWithDebInfo;%PATH%'
+    PATH: 'C:\Python311;C:\Python311\Scripts;%CIRRUS_WORKING_DIR%\build\src\RelWithDebInfo;%PATH%'
     x64_NATIVE_TOOLS: '"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"'
     # Ignore MSBuild warning MSB8029.
     # See: https://learn.microsoft.com/en-us/visualstudio/msbuild/errors/msb8029?view=vs-2022
     IgnoreWarnIntDirInTempDetected: 'true'
   merge_script:
     - PowerShell -NoLogo -Command if ($env:CIRRUS_PR -ne $null) { git fetch $env:CIRRUS_REPO_CLONE_URL pull/$env:CIRRUS_PR/merge; git reset --hard FETCH_HEAD; }
+  install_tools_script:
+    - choco install --yes --no-progress python3 --version=3.11.3
+    - python.exe -m pip install "lief>=0.13.0"
   configure_script:
     - '%x64_NATIVE_TOOLS%'
     - cmake -G "Visual Studio 17 2022" -A x64 -S . -B build -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON
   build_script:
     - '%x64_NATIVE_TOOLS%'
     - cmake --build build --config RelWithDebInfo -- -property:UseMultiToolTask=true;CL_MPcount=5
+  symbol_check_script:
+    - python.exe tools\symbol-check.py build\src\RelWithDebInfo\libsecp256k1-2.dll
   check_script:
     - '%x64_NATIVE_TOOLS%'
     - ctest -C RelWithDebInfo --test-dir build -j 5
