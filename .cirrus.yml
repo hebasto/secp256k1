@@ -95,6 +95,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -113,6 +115,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -137,9 +141,13 @@ task:
         CC: clang
   brew_script:
     - brew install automake libtool gcc
+  python_script:
+    - python3 -m pip install "lief>=0.13.0"
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.dylib
   << : *CAT_LOGS
   << : *CREDITS
 
@@ -160,6 +168,8 @@ task:
     # https://sourceware.org/bugzilla/show_bug.cgi?id=27008
     - rm /etc/ld.so.cache
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -180,6 +190,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -197,6 +209,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -214,6 +228,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.so
   << : *CAT_LOGS
 
 task:
@@ -235,6 +251,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1-2.dll
   << : *CAT_LOGS
 
 task:
@@ -277,6 +295,8 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 ./tools/symbol-check.py .libs/secp256k1-2.dll
   << : *CAT_LOGS
 
 # Sanitizers
@@ -401,6 +421,8 @@ task:
   build_script:
     - '%x64_NATIVE_TOOLS%'
     - cmake --build build --config RelWithDebInfo -- -property:UseMultiToolTask=true;CL_MPcount=5
+  symbol_check_script:
+    - python -V
   check_script:
     - '%x64_NATIVE_TOOLS%'
     - ctest -C RelWithDebInfo --test-dir build -j 5
