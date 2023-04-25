@@ -34,10 +34,44 @@ set_target_properties(secp256k1_precomputed PROPERTIES POSITION_INDEPENDENT_CODE
 target_include_directories(secp256k1 PUBLIC
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
+
+# This emulates Libtool to make sure Libtool and CMake agree on the ABI version,
+# see below "Calculate the version variables" in build-aux/ltmain.sh.
+math(EXPR ${PROJECT_NAME}_soversion "${${PROJECT_NAME}_LIB_VERSION_CURRENT} - ${${PROJECT_NAME}_LIB_VERSION_AGE}")
 set_target_properties(secp256k1 PROPERTIES
-  VERSION "${${PROJECT_NAME}_LIB_VERSION_CURRENT}.${${PROJECT_NAME}_LIB_VERSION_AGE}.${${PROJECT_NAME}_LIB_VERSION_REVISION}"
-  SOVERSION "${${PROJECT_NAME}_LIB_VERSION_CURRENT}"
+  SOVERSION ${${PROJECT_NAME}_soversion}
 )
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  set_target_properties(secp256k1 PROPERTIES
+    VERSION ${${PROJECT_NAME}_soversion}.${${PROJECT_NAME}_LIB_VERSION_AGE}.${${PROJECT_NAME}_LIB_VERSION_REVISION}
+  )
+elseif(APPLE)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
+    math(EXPR ${PROJECT_NAME}_compatibility_version "${${PROJECT_NAME}_LIB_VERSION_CURRENT} + 1")
+    set_target_properties(secp256k1 PROPERTIES
+      MACHO_COMPATIBILITY_VERSION ${${PROJECT_NAME}_compatibility_version}
+      MACHO_CURRENT_VERSION ${${PROJECT_NAME}_compatibility_version}.${${PROJECT_NAME}_LIB_VERSION_REVISION}
+    )
+    unset(${PROJECT_NAME}_compatibility_version)
+  elseif(BUILD_SHARED_LIBS)
+    message(WARNING
+      "The 'compatibility version' and 'current version' values of the DYLIB "
+      "will diverge from the values set by the GNU Libtool. To ensure "
+      "compatibility, it is recommended to upgrade CMake to at least version 3.17."
+    )
+  endif()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  set(${PROJECT_NAME}_dll_suffix "")
+  if(BUILD_SHARED_LIBS)
+    set(${PROJECT_NAME}_dll_suffix "-${${PROJECT_NAME}_soversion}")
+  endif()
+  set_target_properties(secp256k1 PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME "${PROJECT_NAME}${${PROJECT_NAME}_dll_suffix}"
+  )
+  unset(${PROJECT_NAME}_dll_suffix)
+endif()
+unset(${PROJECT_NAME}_soversion)
 
 if(SECP256K1_BUILD_BENCHMARK)
   add_executable(bench bench.c)
