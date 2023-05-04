@@ -134,7 +134,7 @@ typedef int (*secp256k1_nonce_function)(
 #endif
 
 /* Symbol visibility. See libtool manual, section "Windows DLLs". */
-#if defined(_WIN32) && !defined(__GNUC__)
+#if defined(_WIN32)
 # ifdef SECP256K1_BUILD
 #  ifdef DLL_EXPORT
 #   define SECP256K1_API            __declspec (dllexport)
