@@ -1,5 +1,7 @@
 FROM debian:stable
 
+SHELL ["/bin/bash", "-c"]
+
 RUN dpkg --add-architecture i386 && \
     dpkg --add-architecture s390x && \
     dpkg --add-architecture armhf && \
@@ -9,7 +11,7 @@ RUN dpkg --add-architecture i386 && \
 # dkpg-dev: to make pkg-config work in cross-builds
 # llvm: for llvm-symbolizer, which is used by clang's UBSan for symbolized stack traces
 RUN apt-get update && apt-get install --no-install-recommends -y \
-        git ca-certificates \
+        git ca-certificates wget \
         make automake libtool pkg-config dpkg-dev valgrind qemu-user \
         gcc clang llvm libclang-rt-dev libc6-dbg \
         g++ \
@@ -23,6 +25,27 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         sagemath
 
 WORKDIR /root
+
+# Install gcc snapshot
+RUN wget --progress=dot:giga --content-disposition https://kayari.org/gcc-latest/gcc-latest.deb && \
+    dpkg -i gcc-latest_*.deb && \
+    ln -s /opt/gcc-latest/bin/gcc /usr/bin/gcc-snapshot
+
+# Install clang snapshot
+RUN wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc && \
+    # Add repository for this Debian release
+    . /etc/os-release && echo "deb http://apt.llvm.org/${VERSION_CODENAME} llvm-toolchain-${VERSION_CODENAME} main" >> /etc/apt/sources.list && \
+    # Install clang snapshot
+    apt-get update && apt-get install --no-install-recommends -y clang && \
+    # Remove just the "clang" symlink again
+    apt-get remove -y clang && \
+    # We should have exactly two clang versions now
+    ls /usr/bin/clang* && \
+    [[    $(ls /usr/bin/clang-?? | sort | wc -l) -eq "2" ]] && \
+    # Create symlinks for them
+    ln -s $(ls /usr/bin/clang-?? | sort | tail -1) /usr/bin/clang-snapshot && \
+    ln -s $(ls /usr/bin/clang-?? | sort | head -1) /usr/bin/clang
+
 # The "wine" package provides a convience wrapper that we need
 RUN apt-get update && apt-get install --no-install-recommends -y \
         git ca-certificates wine64 wine python3-simplejson python3-six msitools winbind procps && \
