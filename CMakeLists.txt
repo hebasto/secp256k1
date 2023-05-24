@@ -212,8 +212,10 @@ endif()
 include(TryAppendCFlags)
 if(MSVC)
   # Keep the following commands ordered lexicographically.
-  try_append_c_flags(/W2) # Moderate warning level.
+  try_append_c_flags(/W3) # Production quality warning level.
   try_append_c_flags(/wd4146) # Disable warning C4146 "unary minus operator applied to unsigned type, result still unsigned".
+  try_append_c_flags(/wd4244) # Disable warning C4244 "'conversion' conversion from 'type1' to 'type2', possible loss of data".
+  try_append_c_flags(/wd4267) # Disable warning C4267 "'var' : conversion from 'size_t' to 'type', possible loss of data".
 else()
   # Keep the following commands ordered lexicographically.
   try_append_c_flags(-pedantic)
