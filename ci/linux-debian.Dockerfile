@@ -25,9 +25,14 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 WORKDIR /root
 # The "wine" package provides a convience wrapper that we need
 RUN apt-get update && apt-get install --no-install-recommends -y \
-        git ca-certificates wine64 wine python3-simplejson python3-six msitools winbind procps && \
-    git clone https://github.com/mstorsjo/msvc-wine && \
-    mkdir /opt/msvc && \
+        git ca-certificates wine64 wine python3-simplejson python3-six msitools winbind procps
+
+ARG CI_MSVC_WINE_COMMIT
+RUN git clone https://github.com/mstorsjo/msvc-wine && \
+    cd msvc-wine && \
+    git checkout ${CI_MSVC_WINE_COMMIT}
+
+RUN mkdir /opt/msvc && \
     python3 msvc-wine/vsdownload.py --accept-license --dest /opt/msvc Microsoft.VisualStudio.Workload.VCTools && \
     msvc-wine/install.sh /opt/msvc
 
