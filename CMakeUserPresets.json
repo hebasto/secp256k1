@@ -9,11 +9,11 @@
       "cacheVariables": {
         "CMAKE_SYSTEM_NAME": "Darwin",
         "CMAKE_SYSTEM_PROCESSOR": "x86_64",
-        "CMAKE_C_COMPILER": "/usr/bin/clang-15;--target=x86_64-apple-darwin",
+        "CMAKE_C_COMPILER": "/usr/bin/clang-14;--target=x86_64-apple-darwin",
         "CMAKE_OSX_SYSROOT": "/home/hebasto/SDKs/Xcode-12.2-12B45b-extracted-SDK-with-libcxx-headers"
       },
       "environment": {
-        "LDFLAGS": "-fuse-ld=/usr/bin/ld64.lld-15 -mmacosx-version-min=10.15 -mlinker-version=609"
+        "LDFLAGS": "-fuse-ld=/usr/bin/ld64.lld-14 -mmacosx-version-min=10.15 -mlinker-version=609"
       },
       "warnings": {
         "dev": true,
