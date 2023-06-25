@@ -11,21 +11,25 @@ RUN dpkg --add-architecture i386 && \
 RUN apt-get update && apt-get install --no-install-recommends -y \
         git ca-certificates \
         make automake libtool pkg-config dpkg-dev valgrind qemu-user \
-        gcc clang llvm libc6-dbg \
+        gcc clang llvm libclang-rt-dev libc6-dbg \
         g++ \
-        gcc-i686-linux-gnu libc6-dev-i386-cross libc6-dbg:i386 libubsan1:i386 libasan6:i386 \
+        gcc-i686-linux-gnu libc6-dev-i386-cross libc6-dbg:i386 libubsan1:i386 libasan8:i386 \
         gcc-s390x-linux-gnu libc6-dev-s390x-cross libc6-dbg:s390x \
         gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6-dbg:armhf \
         gcc-aarch64-linux-gnu libc6-dev-arm64-cross libc6-dbg:arm64 \
         gcc-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-dbg:ppc64el \
-        gcc-mingw-w64-x86-64-win32 wine64 wine \
+        gcc-mingw-w64-x86-64-win32 wine64 \
         gcc-mingw-w64-i686-win32 wine32 \
         sagemath
 
 WORKDIR /root
+
+# A workaround for `wine` package failure to employ the Debian alternatives system properly.
+RUN ln -s /usr/lib/wine/wine64 /usr/bin/wine64
+
 # The "wine" package provides a convience wrapper that we need
 RUN apt-get update && apt-get install --no-install-recommends -y \
-        git ca-certificates wine64 wine python3-simplejson python3-six msitools winbind procps && \
+        wine python3-simplejson python3-six msitools winbind procps && \
     git clone https://github.com/mstorsjo/msvc-wine && \
     mkdir /opt/msvc && \
     python3 msvc-wine/vsdownload.py --accept-license --dest /opt/msvc Microsoft.VisualStudio.Workload.VCTools && \
