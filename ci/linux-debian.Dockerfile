@@ -20,6 +20,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
         gcc-powerpc64le-linux-gnu libc6-dev-ppc64el-cross libc6-dbg:ppc64el \
         gcc-mingw-w64-x86-64-win32 wine64 wine \
         gcc-mingw-w64-i686-win32 wine32 \
+        python3-full \
         sagemath
 
 WORKDIR /root
@@ -39,3 +40,8 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 # Wait until the wineserver process has exited before closing the session,
 # to avoid corrupting the wine prefix.
     while (ps -A | grep wineserver) > /dev/null; do sleep 1; done
+
+ENV VIRTUAL_ENV=/root/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+RUN pip install lief

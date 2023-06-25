@@ -27,6 +27,7 @@ env:
   BENCH: yes
   SECP256K1_BENCH_ITERS: 2
   CTIMETESTS: yes
+  SYMBOL_CHECK: yes
   # Compile and run the tests
   EXAMPLES: yes
 
@@ -131,6 +132,7 @@ task:
     ASM: no
     WITH_VALGRIND: no
     CTIMETESTS: no
+    SYMBOL_CHECK: no
   matrix:
     - env:
         CC: gcc
@@ -141,6 +143,9 @@ task:
   << : *MERGE_BASE
   test_script:
     - ./ci/cirrus.sh
+  symbol_check_script:
+    - python3 -m pip install lief
+    - python3 ./tools/symbol-check.py .libs/libsecp256k1.dylib
   << : *CAT_LOGS
   << : *CREDITS
 
@@ -254,6 +259,7 @@ task:
     SCHNORRSIG: yes
     ELLSWIFT: yes
     CTIMETESTS: no
+    SYMBOL_CHECK: no
     # Use a MinGW-w64 host to tell ./configure we're building for Windows.
     # This will detect some MinGW-w64 tools but then make will need only
     # the MSVC tools CC, AR and NM as specified below.
@@ -311,6 +317,7 @@ task:
         ASAN_OPTIONS: "strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1"
         LSAN_OPTIONS: "use_unaligned=1"
         SECP256K1_TEST_ITERS: 32
+        SYMBOL_CHECK: no
   # Try to cover many configurations with just a tiny matrix.
   matrix:
     - env:
@@ -409,6 +416,11 @@ task:
   build_script:
     - '%x64_NATIVE_TOOLS%'
     - cmake --build build --config RelWithDebInfo -- -property:UseMultiToolTask=true;CL_MPcount=5
+  symbol_check_script:
+    - choco install --yes --no-progress python3
+    - refreshenv
+    - python -m pip install lief
+    - python .\tools\symbol-check.py build\src\RelWithDebInfo\libsecp256k1-2.dll
   check_script:
     - '%x64_NATIVE_TOOLS%'
     - ctest -C RelWithDebInfo --test-dir build -j 5
