@@ -138,8 +138,7 @@ typedef int (*secp256k1_nonce_function)(
 #if defined(_WIN32)
 # ifdef SECP256K1_BUILD
 #  ifdef DLL_EXPORT
-#   define SECP256K1_API            __declspec (dllexport)
-#   define SECP256K1_API_VAR extern __declspec (dllexport)
+#   define SECP256K1_API __declspec (dllexport)
 #  endif
   /* The user must define SECP256K1_STATIC when consuming libsecp256k1 as a static
    * library. */
@@ -148,17 +147,14 @@ typedef int (*secp256k1_nonce_function)(
     * It does not depend on the Libtool's assumption that if a DLL is being built
     * (DLL_EXPORT is defined) then that DLL is going to consume any dependent libraries
     * as DLLs. See "Windows DLLs" in the Libtool manual. */
-#  define SECP256K1_API             __declspec (dllimport)
-#  define SECP256K1_API_VAR  extern __declspec (dllimport)
+#  define SECP256K1_API __declspec (dllimport)
 # endif
 #endif
 #ifndef SECP256K1_API
 # if defined(__GNUC__) && (__GNUC__ >= 4) && defined(SECP256K1_BUILD)
-#  define SECP256K1_API             __attribute__ ((visibility ("default")))
-#  define SECP256K1_API_VAR  extern __attribute__ ((visibility ("default")))
+#  define SECP256K1_API __attribute__ ((visibility ("default")))
 # else
 #  define SECP256K1_API
-#  define SECP256K1_API_VAR  extern
 # endif
 #endif
 
@@ -230,10 +226,10 @@ typedef int (*secp256k1_nonce_function)(
  *
  *  It is highly recommended to call secp256k1_selftest before using this context.
  */
-SECP256K1_API_VAR const secp256k1_context *secp256k1_context_static;
+SECP256K1_API extern const secp256k1_context *secp256k1_context_static;
 
 /** Deprecated alias for secp256k1_context_static. */
-SECP256K1_API_VAR const secp256k1_context *secp256k1_context_no_precomp
+SECP256K1_API extern const secp256k1_context *secp256k1_context_no_precomp
 SECP256K1_DEPRECATED("Use secp256k1_context_static instead");
 
 /** Perform basic self tests (to be used in conjunction with secp256k1_context_static)
@@ -630,10 +626,10 @@ SECP256K1_API int secp256k1_ecdsa_signature_normalize(
  * If a data pointer is passed, it is assumed to be a pointer to 32 bytes of
  * extra entropy.
  */
-SECP256K1_API_VAR const secp256k1_nonce_function secp256k1_nonce_function_rfc6979;
+SECP256K1_API extern const secp256k1_nonce_function secp256k1_nonce_function_rfc6979;
 
 /** A default safe nonce generation function (currently equal to secp256k1_nonce_function_rfc6979). */
-SECP256K1_API_VAR const secp256k1_nonce_function secp256k1_nonce_function_default;
+SECP256K1_API extern const secp256k1_nonce_function secp256k1_nonce_function_default;
 
 /** Create an ECDSA signature.
  *
