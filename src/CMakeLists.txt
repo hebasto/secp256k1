@@ -8,7 +8,7 @@ add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL
 
 # Add objects explicitly rather than linking to the object libs to keep them
 # from being exported.
-add_library(secp256k1 secp256k1.c $<TARGET_OBJECTS:secp256k1_precomputed>)
+add_library(secp256k1 secp256k1.c)
 
 add_library(secp256k1_asm INTERFACE)
 if(SECP256K1_ASM STREQUAL "arm32")
