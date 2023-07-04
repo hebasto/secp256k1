@@ -26,9 +26,15 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
 
 WORKDIR /root
 
-# Install gcc snapshot
-RUN wget --progress=dot:giga --content-disposition https://kayari.org/gcc-latest/gcc-latest.deb && \
-    dpkg -i gcc-latest_*.deb && \
+# Build and install gcc snapshot
+ARG GCC_SNAPSHOT_VERSION=gcc-14-20230702
+RUN wget --progress=dot:giga --content-disposition https://gcc.gnu.org/pub/gcc/snapshots/LATEST-14/${GCC_SNAPSHOT_VERSION}.tar.xz && \
+    tar xf ${GCC_SNAPSHOT_VERSION}.tar.xz && \
+    apt-get update && apt-get install --no-install-recommends -y libgmp-dev libmpfr-dev libmpc-dev flex && \
+    mkdir gcc-build && cd gcc-build && \
+    ../${GCC_SNAPSHOT_VERSION}/configure --prefix=/opt/gcc-latest --enable-languages=c --disable-bootstrap --disable-multilib --without-isl && \
+    make -j $(nproc) && \
+    make install && \
     ln -s /opt/gcc-latest/bin/gcc /usr/bin/gcc-snapshot
 
 # Install clang snapshot
