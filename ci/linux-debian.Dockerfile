@@ -2,7 +2,7 @@ FROM debian:stable
 
 SHELL ["/bin/bash", "-c"]
 
-ENV GCC_PACKAGES="git ca-certificates wget xz-utils libgmp-dev libmpfr-dev libmpc-dev flex pkg-config gcc"
+ENV GCC_PACKAGES="git ca-certificates wget xz-utils libgmp-dev libmpfr-dev libmpc-dev flex pkg-config gcc g++"
 RUN apt-get update && apt-get install --no-install-recommends -y \
     autoconf automake libtool make \
     ${GCC_PACKAGES}
