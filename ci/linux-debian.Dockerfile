@@ -6,7 +6,7 @@ ENV GCC_PACKAGES="wget xz-utils libgmp-dev libmpfr-dev libmpc-dev flex gcc g++"
 RUN apt-get update && apt-get install --no-install-recommends -y \
     git ca-certificates \
     autoconf automake libtool make \
-    valgrind \
+    valgrind python3 \
     ${GCC_PACKAGES}
 
 WORKDIR /root
