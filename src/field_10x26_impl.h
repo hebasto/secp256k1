@@ -14,6 +14,9 @@
 
 #ifdef VERIFY
 static void secp256k1_fe_impl_verify(const secp256k1_fe *a) {
+    const uint32_t *d = a->n;
+    int m = a->normalized ? 1 : 2 * a->magnitude;
+
     /* Magnitude between 0 and 32. */
     VERIFY_CHECK((a->magnitude >= 0) && (a->magnitude <= 32));
     /* Normalized is 0 or 1. */
@@ -21,8 +24,6 @@ static void secp256k1_fe_impl_verify(const secp256k1_fe *a) {
     /* If normalized, magnitude must be 0 or 1. */
     if (a->normalized) VERIFY_CHECK(a->magnitude <= 1);
 
-    const uint32_t *d = a->n;
-    int m = a->normalized ? 1 : 2 * a->magnitude;
     VERIFY_CHECK(d[0] <= 0x3FFFFFFUL * m);
     VERIFY_CHECK(d[1] <= 0x3FFFFFFUL * m);
     VERIFY_CHECK(d[2] <= 0x3FFFFFFUL * m);
@@ -58,16 +59,16 @@ static void secp256k1_fe_impl_get_bounds(secp256k1_fe *r, int m) {
 }
 
 static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
-#ifdef VERIFY
-    secp256k1_fe_impl_verify(r);
-#endif
-
     uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
              t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
     /* Reduce t9 at the start so there will be at most a single carry from the first pass */
     uint32_t m;
     uint32_t x = t9 >> 22; t9 &= 0x03FFFFFUL;
+
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(r);
+#endif
 
     /* The first pass ensures the magnitude is 1, ... */
     t0 += x * 0x3D1UL; t1 += (x << 6);
@@ -143,16 +144,16 @@ static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r) {
 }
 
 static void secp256k1_fe_impl_normalize_var(secp256k1_fe *r) {
-#ifdef VERIFY
-    secp256k1_fe_impl_verify(r);
-#endif
-
     uint32_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4],
              t5 = r->n[5], t6 = r->n[6], t7 = r->n[7], t8 = r->n[8], t9 = r->n[9];
 
     /* Reduce t9 at the start so there will be at most a single carry from the first pass */
     uint32_t m;
     uint32_t x = t9 >> 22; t9 &= 0x03FFFFFUL;
+
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(r);
+#endif
 
     /* The first pass ensures the magnitude is 1, ... */
     t0 += x * 0x3D1UL; t1 += (x << 6);
@@ -289,12 +290,13 @@ SECP256K1_INLINE static void secp256k1_fe_impl_set_int(secp256k1_fe *r, int a) {
 }
 
 SECP256K1_INLINE static int secp256k1_fe_impl_is_zero(const secp256k1_fe *a) {
+    const uint32_t *t = a->n;
+
 #ifdef VERIFY
     secp256k1_fe_impl_verify(a);
     VERIFY_CHECK(a->normalized);
 #endif
 
-    const uint32_t *t = a->n;
     return (t[0] | t[1] | t[2] | t[3] | t[4] | t[5] | t[6] | t[7] | t[8] | t[9]) == 0;
 }
 
