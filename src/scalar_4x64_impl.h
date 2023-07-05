@@ -7,6 +7,8 @@
 #ifndef SECP256K1_SCALAR_REPR_IMPL_H
 #define SECP256K1_SCALAR_REPR_IMPL_H
 
+#include "scalar_4x64.h"
+
 #include "checkmem.h"
 #include "int128.h"
 #include "modinv64_impl.h"

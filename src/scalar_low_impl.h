@@ -7,6 +7,10 @@
 #ifndef SECP256K1_SCALAR_REPR_IMPL_H
 #define SECP256K1_SCALAR_REPR_IMPL_H
 
+#if defined(EXHAUSTIVE_TEST_ORDER)
+
+#include "scalar_low.h"
+
 #include "checkmem.h"
 #include "scalar.h"
 #include "util.h"
@@ -138,5 +142,7 @@ static void secp256k1_scalar_inverse(secp256k1_scalar *r, const secp256k1_scalar
 static void secp256k1_scalar_inverse_var(secp256k1_scalar *r, const secp256k1_scalar *x) {
     secp256k1_scalar_inverse(r, x);
 }
+
+#endif
 
 #endif /* SECP256K1_SCALAR_REPR_IMPL_H */
