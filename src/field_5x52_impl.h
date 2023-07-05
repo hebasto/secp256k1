@@ -59,6 +59,10 @@ static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
     uint64_t m;
     uint64_t x = t4 >> 48; t4 &= 0x0FFFFFFFFFFFFULL;
 
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(r);
+#endif
+
     /* The first pass ensures the magnitude is 1, ... */
     t0 += x * 0x1000003D1ULL;
     t1 += (t0 >> 52); t0 &= 0xFFFFFFFFFFFFFULL;
@@ -87,6 +91,12 @@ static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
     t4 &= 0x0FFFFFFFFFFFFULL;
 
     r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
+
+#ifdef VERIFY
+    r->magnitude = 1;
+    r->normalized = 1;
+    secp256k1_fe_impl_verify(r);
+#endif
 }
 
 static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r) {
@@ -499,7 +509,7 @@ static void secp256k1_fe_impl_inv(secp256k1_fe *r, const secp256k1_fe *x) {
     secp256k1_fe tmp = *x;
     secp256k1_modinv64_signed62 s;
 
-    secp256k1_fe_normalize(&tmp);
+    secp256k1_fe_impl_normalize(&tmp);
     secp256k1_fe_to_signed62(&s, &tmp);
     secp256k1_modinv64(&s, &secp256k1_const_modinfo_fe);
     secp256k1_fe_from_signed62(r, &s);
