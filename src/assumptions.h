@@ -8,6 +8,7 @@
 #define SECP256K1_ASSUMPTIONS_H
 
 #include <limits.h>
+#include <stdint.h>
 
 #include "util.h"
 #if defined(SECP256K1_INT128_NATIVE)
