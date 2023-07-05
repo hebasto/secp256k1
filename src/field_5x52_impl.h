@@ -9,8 +9,41 @@
 
 #include "checkmem.h"
 #include "util.h"
-#include "field.h"
+#include "field_5x52.h"
 #include "modinv64_impl.h"
+
+#ifndef VERIFY
+/* In non-VERIFY mode, we #define the fe operations to be identical to their
+ * internal field implementation, to avoid the potential overhead of a
+ * function call (even though presumably inlinable). */
+#  define secp256k1_fe_normalize secp256k1_fe_impl_normalize
+#  define secp256k1_fe_normalize_weak secp256k1_fe_impl_normalize_weak
+#  define secp256k1_fe_normalize_var secp256k1_fe_impl_normalize_var
+#  define secp256k1_fe_normalizes_to_zero secp256k1_fe_impl_normalizes_to_zero
+#  define secp256k1_fe_normalizes_to_zero_var secp256k1_fe_impl_normalizes_to_zero_var
+#  define secp256k1_fe_set_int secp256k1_fe_impl_set_int
+#  define secp256k1_fe_clear secp256k1_fe_impl_clear
+#  define secp256k1_fe_is_zero secp256k1_fe_impl_is_zero
+#  define secp256k1_fe_is_odd secp256k1_fe_impl_is_odd
+#  define secp256k1_fe_cmp_var secp256k1_fe_impl_cmp_var
+#  define secp256k1_fe_set_b32_mod secp256k1_fe_impl_set_b32_mod
+#  define secp256k1_fe_set_b32_limit secp256k1_fe_impl_set_b32_limit
+#  define secp256k1_fe_get_b32 secp256k1_fe_impl_get_b32
+#  define secp256k1_fe_negate_unchecked secp256k1_fe_impl_negate_unchecked
+#  define secp256k1_fe_mul_int_unchecked secp256k1_fe_impl_mul_int_unchecked
+#  define secp256k1_fe_add secp256k1_fe_impl_add
+#  define secp256k1_fe_mul secp256k1_fe_impl_mul
+#  define secp256k1_fe_sqr secp256k1_fe_impl_sqr
+#  define secp256k1_fe_cmov secp256k1_fe_impl_cmov
+#  define secp256k1_fe_to_storage secp256k1_fe_impl_to_storage
+#  define secp256k1_fe_from_storage secp256k1_fe_impl_from_storage
+#  define secp256k1_fe_inv secp256k1_fe_impl_inv
+#  define secp256k1_fe_inv_var secp256k1_fe_impl_inv_var
+#  define secp256k1_fe_get_bounds secp256k1_fe_impl_get_bounds
+#  define secp256k1_fe_half secp256k1_fe_impl_half
+#  define secp256k1_fe_add_int secp256k1_fe_impl_add_int
+#  define secp256k1_fe_is_square_var secp256k1_fe_impl_is_square_var
+#endif /* !defined(VERIFY) */
 
 #if defined(USE_ASM_X86_64)
 #include "field_5x52_asm_impl.h"
@@ -33,6 +66,16 @@ static void secp256k1_fe_impl_verify(const secp256k1_fe *a) {
             VERIFY_CHECK(d[0] < 0xFFFFEFFFFFC2FULL);
         }
     }
+}
+static void secp256k1_fe_verify(const secp256k1_fe *a) {
+    /* Magnitude between 0 and 32. */
+    VERIFY_CHECK((a->magnitude >= 0) && (a->magnitude <= 32));
+    /* Normalized is 0 or 1. */
+    VERIFY_CHECK((a->normalized == 0) || (a->normalized == 1));
+    /* If normalized, magnitude must be 0 or 1. */
+    if (a->normalized) VERIFY_CHECK(a->magnitude <= 1);
+    /* Invoke implementation-specific checks. */
+    secp256k1_fe_impl_verify(a);
 }
 #endif
 
@@ -80,6 +123,16 @@ static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
 
     r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
 }
+
+#ifdef VERIFY
+SECP256K1_INLINE static void secp256k1_fe_normalize(secp256k1_fe *r) {
+    secp256k1_fe_verify(r);
+    secp256k1_fe_impl_normalize(r);
+    r->magnitude = 1;
+    r->normalized = 1;
+    secp256k1_fe_verify(r);
+}
+#endif
 
 static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
@@ -501,7 +554,7 @@ static void secp256k1_fe_impl_inv_var(secp256k1_fe *r, const secp256k1_fe *x) {
     secp256k1_fe tmp = *x;
     secp256k1_modinv64_signed62 s;
 
-    secp256k1_fe_normalize_var(&tmp);
+    secp256k1_fe_impl_normalize_var(&tmp);
     secp256k1_fe_to_signed62(&s, &tmp);
     secp256k1_modinv64_var(&s, &secp256k1_const_modinfo_fe);
     secp256k1_fe_from_signed62(r, &s);
@@ -513,9 +566,9 @@ static int secp256k1_fe_impl_is_square_var(const secp256k1_fe *x) {
     int jac, ret;
 
     tmp = *x;
-    secp256k1_fe_normalize_var(&tmp);
+    secp256k1_fe_impl_normalize_var(&tmp);
     /* secp256k1_jacobi64_maybe_var cannot deal with input 0. */
-    if (secp256k1_fe_is_zero(&tmp)) return 1;
+    if (secp256k1_fe_impl_is_zero(&tmp)) return 1;
     secp256k1_fe_to_signed62(&s, &tmp);
     jac = secp256k1_jacobi64_maybe_var(&s, &secp256k1_const_modinfo_fe);
     if (jac == 0) {
