@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#include "int128.h"
+#include "int128_impl.h"
 #include "util.h"
 
 #ifdef VERIFY

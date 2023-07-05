@@ -9,6 +9,7 @@
 
 #include "checkmem.h"
 #include "util.h"
+#include "field_10x26.h"
 #include "field.h"
 #include "modinv32_impl.h"
 

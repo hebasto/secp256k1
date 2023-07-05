@@ -9,6 +9,7 @@
 
 #include "checkmem.h"
 #include "util.h"
+#include "field_5x52.h"
 #include "field.h"
 #include "modinv64_impl.h"
 
