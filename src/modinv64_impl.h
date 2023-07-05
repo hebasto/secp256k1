@@ -7,7 +7,7 @@
 #ifndef SECP256K1_MODINV64_IMPL_H
 #define SECP256K1_MODINV64_IMPL_H
 
-#include "int128.h"
+#include "int128_impl.h"
 #include "modinv64.h"
 
 /* This file implements modular inversion based on the paper "Fast constant-time gcd computation and
