@@ -14,6 +14,13 @@
 
 #ifdef VERIFY
 static void secp256k1_fe_impl_verify(const secp256k1_fe *a) {
+    /* Magnitude between 0 and 32. */
+    VERIFY_CHECK((a->magnitude >= 0) && (a->magnitude <= 32));
+    /* Normalized is 0 or 1. */
+    VERIFY_CHECK((a->normalized == 0) || (a->normalized == 1));
+    /* If normalized, magnitude must be 0 or 1. */
+    if (a->normalized) VERIFY_CHECK(a->magnitude <= 1);
+
     const uint32_t *d = a->n;
     int m = a->normalized ? 1 : 2 * a->magnitude;
     VERIFY_CHECK(d[0] <= 0x3FFFFFFUL * m);
