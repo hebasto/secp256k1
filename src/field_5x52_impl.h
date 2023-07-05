@@ -22,6 +22,14 @@
 static void secp256k1_fe_impl_verify(const secp256k1_fe *a) {
     const uint64_t *d = a->n;
     int m = a->normalized ? 1 : 2 * a->magnitude;
+
+    /* Magnitude between 0 and 32. */
+    VERIFY_CHECK((a->magnitude >= 0) && (a->magnitude <= 32));
+    /* Normalized is 0 or 1. */
+    VERIFY_CHECK((a->normalized == 0) || (a->normalized == 1));
+    /* If normalized, magnitude must be 0 or 1. */
+    if (a->normalized) VERIFY_CHECK(a->magnitude <= 1);
+
    /* secp256k1 'p' value defined in "Standards for Efficient Cryptography" (SEC2) 2.7.1. */
     VERIFY_CHECK(d[0] <= 0xFFFFFFFFFFFFFULL * m);
     VERIFY_CHECK(d[1] <= 0xFFFFFFFFFFFFFULL * m);
