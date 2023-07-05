@@ -9,7 +9,7 @@
 
 #include "checkmem.h"
 #include "util.h"
-#include "field.h"
+#include "field_10x26.h"
 #include "modinv32_impl.h"
 
 #ifdef VERIFY
