@@ -9,7 +9,7 @@
 
 #include "checkmem.h"
 #include "util.h"
-#include "field.h"
+#include "field_5x52.h"
 #include "modinv64_impl.h"
 
 #if defined(USE_ASM_X86_64)
@@ -491,7 +491,7 @@ static void secp256k1_fe_impl_inv(secp256k1_fe *r, const secp256k1_fe *x) {
     secp256k1_fe tmp = *x;
     secp256k1_modinv64_signed62 s;
 
-    secp256k1_fe_normalize(&tmp);
+    secp256k1_fe_impl_normalize(&tmp);
     secp256k1_fe_to_signed62(&s, &tmp);
     secp256k1_modinv64(&s, &secp256k1_const_modinfo_fe);
     secp256k1_fe_from_signed62(r, &s);
@@ -501,7 +501,7 @@ static void secp256k1_fe_impl_inv_var(secp256k1_fe *r, const secp256k1_fe *x) {
     secp256k1_fe tmp = *x;
     secp256k1_modinv64_signed62 s;
 
-    secp256k1_fe_normalize_var(&tmp);
+    secp256k1_fe_impl_normalize_var(&tmp);
     secp256k1_fe_to_signed62(&s, &tmp);
     secp256k1_modinv64_var(&s, &secp256k1_const_modinfo_fe);
     secp256k1_fe_from_signed62(r, &s);
@@ -513,9 +513,9 @@ static int secp256k1_fe_impl_is_square_var(const secp256k1_fe *x) {
     int jac, ret;
 
     tmp = *x;
-    secp256k1_fe_normalize_var(&tmp);
+    secp256k1_fe_impl_normalize_var(&tmp);
     /* secp256k1_jacobi64_maybe_var cannot deal with input 0. */
-    if (secp256k1_fe_is_zero(&tmp)) return 1;
+    if (secp256k1_fe_impl_is_zero(&tmp)) return 1;
     secp256k1_fe_to_signed62(&s, &tmp);
     jac = secp256k1_jacobi64_maybe_var(&s, &secp256k1_const_modinfo_fe);
     if (jac == 0) {
