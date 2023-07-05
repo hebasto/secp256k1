@@ -291,6 +291,12 @@ SECP256K1_INLINE static void secp256k1_fe_impl_set_int(secp256k1_fe *r, int a) {
 
 SECP256K1_INLINE static int secp256k1_fe_impl_is_zero(const secp256k1_fe *a) {
     const uint32_t *t = a->n;
+
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(a);
+    VERIFY_CHECK(a->normalized);
+#endif
+
     return (t[0] | t[1] | t[2] | t[3] | t[4] | t[5] | t[6] | t[7] | t[8] | t[9]) == 0;
 }
 
@@ -1253,7 +1259,7 @@ static int secp256k1_fe_impl_is_square_var(const secp256k1_fe *x) {
     tmp = *x;
     secp256k1_fe_impl_normalize_var(&tmp);
     /* secp256k1_jacobi32_maybe_var cannot deal with input 0. */
-    if (secp256k1_fe_is_zero(&tmp)) return 1;
+    if (secp256k1_fe_impl_is_zero(&tmp)) return 1;
     secp256k1_fe_to_signed30(&s, &tmp);
     jac = secp256k1_jacobi32_maybe_var(&s, &secp256k1_const_modinfo_fe);
     if (jac == 0) {

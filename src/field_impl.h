@@ -224,8 +224,6 @@ SECP256K1_INLINE static void secp256k1_fe_clear(secp256k1_fe *a) {
 
 static int secp256k1_fe_impl_is_zero(const secp256k1_fe *a);
 SECP256K1_INLINE static int secp256k1_fe_is_zero(const secp256k1_fe *a) {
-    secp256k1_fe_verify(a);
-    VERIFY_CHECK(a->normalized);
     return secp256k1_fe_impl_is_zero(a);
 }
 
