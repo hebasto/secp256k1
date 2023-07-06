@@ -69,6 +69,7 @@ static const secp256k1_fe secp256k1_const_beta = SECP256K1_FE_CONST(
  * internal field implementation, to avoid the potential overhead of a
  * function call (even though presumably inlinable). */
 #  define secp256k1_fe_equal secp256k1_fe_impl_equal
+#  define secp256k1_fe_equal_var secp256k1_fe_impl_equal_var
 #  define secp256k1_fe_normalize secp256k1_fe_impl_normalize
 #  define secp256k1_fe_normalize_weak secp256k1_fe_impl_normalize_weak
 #  define secp256k1_fe_normalize_var secp256k1_fe_impl_normalize_var
