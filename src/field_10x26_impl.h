@@ -213,6 +213,10 @@ static int secp256k1_fe_impl_normalizes_to_zero(const secp256k1_fe *r) {
     /* Reduce t9 at the start so there will be at most a single carry from the first pass */
     uint32_t x = t9 >> 22; t9 &= 0x03FFFFFUL;
 
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(r);
+#endif
+
     /* The first pass ensures the magnitude is 1, ... */
     t0 += x * 0x3D1UL; t1 += (x << 6);
     t1 += (t0 >> 26); t0 &= 0x3FFFFFFUL; z0  = t0; z1  = t0 ^ 0x3D0UL;
