@@ -75,7 +75,6 @@ static const secp256k1_fe secp256k1_const_beta = SECP256K1_FE_CONST(
 /* In non-VERIFY mode, we #define the fe operations to be identical to their
  * internal field implementation, to avoid the potential overhead of a
  * function call (even though presumably inlinable). */
-#  define secp256k1_fe_normalize_weak secp256k1_fe_impl_normalize_weak
 #  define secp256k1_fe_normalize_var secp256k1_fe_impl_normalize_var
 #  define secp256k1_fe_normalizes_to_zero secp256k1_fe_impl_normalizes_to_zero
 #  define secp256k1_fe_normalizes_to_zero_var secp256k1_fe_impl_normalizes_to_zero_var
