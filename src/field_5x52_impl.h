@@ -44,12 +44,16 @@ static void secp256k1_fe_impl_get_bounds(secp256k1_fe *r, int m) {
     r->n[4] = 0x0FFFFFFFFFFFFULL * 2 * m;
 }
 
-static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
+static void secp256k1_fe_normalize(secp256k1_fe *r) {
     uint64_t t0 = r->n[0], t1 = r->n[1], t2 = r->n[2], t3 = r->n[3], t4 = r->n[4];
 
     /* Reduce t4 at the start so there will be at most a single carry from the first pass */
     uint64_t m;
     uint64_t x = t4 >> 48; t4 &= 0x0FFFFFFFFFFFFULL;
+
+#ifdef VERIFY
+    secp256k1_fe_verify(r);
+#endif
 
     /* The first pass ensures the magnitude is 1, ... */
     t0 += x * 0x1000003D1ULL;
@@ -79,6 +83,12 @@ static void secp256k1_fe_impl_normalize(secp256k1_fe *r) {
     t4 &= 0x0FFFFFFFFFFFFULL;
 
     r->n[0] = t0; r->n[1] = t1; r->n[2] = t2; r->n[3] = t3; r->n[4] = t4;
+
+#ifdef VERIFY
+    r->magnitude = 1;
+    r->normalized = 1;
+    secp256k1_fe_verify(r);
+#endif
 }
 
 static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r) {

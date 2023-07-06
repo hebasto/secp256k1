@@ -172,15 +172,6 @@ static void secp256k1_fe_verify(const secp256k1_fe *a) {
     secp256k1_fe_impl_verify(a);
 }
 
-static void secp256k1_fe_impl_normalize(secp256k1_fe *r);
-SECP256K1_INLINE static void secp256k1_fe_normalize(secp256k1_fe *r) {
-    secp256k1_fe_verify(r);
-    secp256k1_fe_impl_normalize(r);
-    r->magnitude = 1;
-    r->normalized = 1;
-    secp256k1_fe_verify(r);
-}
-
 static void secp256k1_fe_impl_normalize_weak(secp256k1_fe *r);
 SECP256K1_INLINE static void secp256k1_fe_normalize_weak(secp256k1_fe *r) {
     secp256k1_fe_verify(r);
