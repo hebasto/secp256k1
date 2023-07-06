@@ -295,13 +295,7 @@ SECP256K1_INLINE static void secp256k1_fe_mul_int_unchecked(secp256k1_fe *r, int
 
 static void secp256k1_fe_impl_add(secp256k1_fe *r, const secp256k1_fe *a);
 SECP256K1_INLINE static void secp256k1_fe_add(secp256k1_fe *r, const secp256k1_fe *a) {
-    secp256k1_fe_verify(r);
-    secp256k1_fe_verify(a);
-    VERIFY_CHECK(r->magnitude + a->magnitude <= 32);
     secp256k1_fe_impl_add(r, a);
-    r->magnitude += a->magnitude;
-    r->normalized = 0;
-    secp256k1_fe_verify(r);
 }
 
 static void secp256k1_fe_impl_mul(secp256k1_fe *r, const secp256k1_fe *a, const secp256k1_fe * SECP256K1_RESTRICT b);
