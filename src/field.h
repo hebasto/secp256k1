@@ -88,6 +88,7 @@ static const secp256k1_fe secp256k1_const_beta = SECP256K1_FE_CONST(
 #  define secp256k1_fe_add secp256k1_fe_impl_add
 #  define secp256k1_fe_mul secp256k1_fe_impl_mul
 #  define secp256k1_fe_sqr secp256k1_fe_impl_sqr
+#  define secp256k1_fe_sqrt secp256k1_fe_impl_sqrt
 #  define secp256k1_fe_cmov secp256k1_fe_impl_cmov
 #  define secp256k1_fe_to_storage secp256k1_fe_impl_to_storage
 #  define secp256k1_fe_from_storage secp256k1_fe_impl_from_storage
