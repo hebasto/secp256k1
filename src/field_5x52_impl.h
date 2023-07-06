@@ -353,6 +353,12 @@ static void secp256k1_fe_impl_get_b32(unsigned char *r, const secp256k1_fe *a) {
 }
 
 SECP256K1_INLINE static void secp256k1_fe_impl_negate_unchecked(secp256k1_fe *r, const secp256k1_fe *a, int m) {
+#ifdef VERIFY
+    secp256k1_fe_impl_verify(a);
+    VERIFY_CHECK(m >= 0 && m <= 31);
+    VERIFY_CHECK(a->magnitude <= m);
+#endif
+
     /* For all legal values of m (0..31), the following properties hold: */
     VERIFY_CHECK(0xFFFFEFFFFFC2FULL * 2 * (m + 1) >= 0xFFFFFFFFFFFFFULL * 2 * m);
     VERIFY_CHECK(0xFFFFFFFFFFFFFULL * 2 * (m + 1) >= 0xFFFFFFFFFFFFFULL * 2 * m);
@@ -365,6 +371,12 @@ SECP256K1_INLINE static void secp256k1_fe_impl_negate_unchecked(secp256k1_fe *r,
     r->n[2] = 0xFFFFFFFFFFFFFULL * 2 * (m + 1) - a->n[2];
     r->n[3] = 0xFFFFFFFFFFFFFULL * 2 * (m + 1) - a->n[3];
     r->n[4] = 0x0FFFFFFFFFFFFULL * 2 * (m + 1) - a->n[4];
+
+#ifdef VERIFY
+    r->magnitude = m + 1;
+    r->normalized = 0;
+    secp256k1_fe_impl_verify(r);
+#endif
 }
 
 SECP256K1_INLINE static void secp256k1_fe_impl_mul_int_unchecked(secp256k1_fe *r, int a) {
