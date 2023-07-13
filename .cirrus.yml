@@ -398,13 +398,6 @@ task:
     # Ignore MSBuild warning MSB8029.
     # See: https://learn.microsoft.com/en-us/visualstudio/msbuild/errors/msb8029?view=vs-2022
     IgnoreWarnIntDirInTempDetected: 'true'
-  matrix:
-    - env:
-        BUILD_SHARED_LIBS: ON
-        SYMBOL_CHECK: yes
-    - env:
-        BUILD_SHARED_LIBS: OFF
-        SYMBOL_CHECK: no
   git_show_script:
     # Print commit to allow reproducing the job outside of CI.
     - git show --no-patch
@@ -414,11 +407,16 @@ task:
   build_script:
     - '%x64_NATIVE_TOOLS%'
     - cmake --build build --config RelWithDebInfo -- -property:UseMultiToolTask=true;CL_MPcount=5
-  symbol_check_script:
-    - choco install --yes --no-progress python3
-    - refreshenv
-    - python -m pip install lief
-    - python .\tools\symbol-check.py build\src\RelWithDebInfo\libsecp256k1-2.dll
+  matrix:
+    - env:
+        BUILD_SHARED_LIBS: ON
+      symbol_check_script:
+        - choco install --yes --no-progress python3
+        - refreshenv
+        - python -m pip install lief
+        - python .\tools\symbol-check.py build\src\RelWithDebInfo\libsecp256k1-2.dll
+    - env:
+        BUILD_SHARED_LIBS: OFF
   check_script:
     - '%x64_NATIVE_TOOLS%'
     - ctest -C RelWithDebInfo --test-dir build -j 5
