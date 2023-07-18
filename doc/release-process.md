@@ -46,6 +46,13 @@ gcc -o ecdsa examples/ecdsa.c -I $dir/include -L $dir/lib*/ -l secp256k1 -Wl,-rp
    * if this is not a patch release
        * updates `_PKG_VERSION_*` and `_LIB_VERSION_*`  in `configure.ac` and
        * updates `project(libsecp256k1 VERSION ...)` and `${PROJECT_NAME}_LIB_VERSION_*` in `CMakeLists.txt`.
+
+ABI Compatibility must be checked with the [`check-abi.sh`](/tools/check-abi.sh) tool (installing packages `abi-dumper` and
+ `abi-compliance-checker` might be required):
+ ```shell
+ tools/check-abi.sh $(git describe --abbrev=0) master
+ ```
+
 2. After the PR is merged, tag the commit and push it:
    ```
    RELEASE_COMMIT=<merge commit of step 1>
