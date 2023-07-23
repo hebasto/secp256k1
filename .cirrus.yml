@@ -81,15 +81,28 @@ task:
         # The `--error-exitcode` is required to make the test fail if valgrind found errors, otherwise it'll return 0 (https://www.valgrind.org/docs/manual/manual-core.html)
         WRAPPER_CMD: "valgrind --error-exitcode=42"
         SECP256K1_TEST_ITERS: 2
+      matrix:
+        - env:
+            CC: clang
+        - env:
+            HOST: i686-linux-gnu
+            CC: i686-linux-gnu-gcc
     - name: "UBSan, ASan, LSan"
       container:
         memory: 2G
       env:
-        CFLAGS: "-fsanitize=undefined,address -g"
         UBSAN_OPTIONS: "print_stacktrace=1:halt_on_error=1"
         ASAN_OPTIONS: "strict_string_checks=1:detect_stack_use_after_return=1:detect_leaks=1"
         LSAN_OPTIONS: "use_unaligned=1"
         SECP256K1_TEST_ITERS: 32
+      matrix:
+        - env:
+            CC: clang
+            CFLAGS: "-fsanitize=undefined,integer,address -fno-sanitize=implicit-unsigned-integer-truncation,implicit-signed-integer-truncation,unsigned-integer-overflow,unsigned-shift-base,implicit-integer-sign-change -g"
+        - env:
+            HOST: i686-linux-gnu
+            CC: i686-linux-gnu-gcc
+            CFLAGS: "-fsanitize=undefined,address -g"
   # Try to cover many configurations with just a tiny matrix.
   matrix:
     - env:
@@ -98,12 +111,6 @@ task:
         ASM: no
         ECMULTGENPRECISION: 2
         ECMULTWINDOW: 2
-  matrix:
-    - env:
-        CC: clang
-    - env:
-        HOST: i686-linux-gnu
-        CC: i686-linux-gnu-gcc
   test_script:
     - ./ci/cirrus.sh
   << : *CAT_LOGS
