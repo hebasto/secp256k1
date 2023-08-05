@@ -1,0 +1,102 @@
+name: libsecp256k1-ci
+run-name: libsecp256k1 CI
+on: [pull_request, push]
+
+env:
+  ### compiler options
+  HOST:
+  WRAPPER_CMD:
+  # Specific warnings can be disabled with -Wno-error=foo.
+  # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.
+  WERROR_CFLAGS: '-Werror -pedantic-errors'
+  MAKEFLAGS: '-j4'
+  BUILD: 'check'
+  ### secp256k1 config
+  ECMULTWINDOW: 'auto'
+  ECMULTGENPRECISION: 'auto'
+  ASM: 'no'
+  WIDEMUL: 'auto'
+  WITH_VALGRIND: 'yes'
+  EXTRAFLAGS:
+  ### secp256k1 modules
+  EXPERIMENTAL: 'no'
+  ECDH: 'no'
+  RECOVERY: 'no'
+  SCHNORRSIG: 'no'
+  ELLSWIFT: 'no'
+  ### test options
+  SECP256K1_TEST_ITERS:
+  BENCH: 'yes'
+  SECP256K1_BENCH_ITERS: 2
+  CTIMETESTS: 'yes'
+  # Compile and run the examples.
+  EXAMPLES: 'yes'
+
+jobs:
+  macos-native:
+    name: "x86_64: macOS Ventura"
+    # See: https://github.com/actions/runner-images#available-images.
+    runs-on: macos-13
+
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      # GitHub Actions give us a fixed number of 4 virtual CPUs. Not that we even have that many jobs at the moment...
+      MAKEFLAGS: '-j5'
+      ASM: 'no'
+      WITH_VALGRIND: 'no'
+      CTIMETESTS: 'no'
+      CC: 'clang'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { widemul:  'int64', recovery: 'yes', ecdh: 'yes', schnorrsig: 'yes', ellswift: 'yes' }
+          - { widemul:  'int64', recovery: 'yes', ecdh: 'yes', schnorrsig: 'yes', ellswift: 'yes', cc: 'gcc' }
+          - { widemul: 'int128_struct', ecmultgenprecision: 2, ecmultwindow: 4 }
+          - { widemul: 'int128',                  ecdh: 'yes', schnorrsig: 'yes', ellswift: 'yes' }
+          - { widemul: 'int128', recovery: 'yes',              schnorrsig: 'yes' }
+          - { widemul: 'int128', recovery: 'yes', ecdh: 'yes', schnorrsig: 'yes', ellswift: 'yes', cc: 'gcc' }
+          - { widemul: 'int128', recovery: 'yes', ecdh: 'yes', schnorrsig: 'yes', ellswift: 'yes', cppflags: '-DVERIFY' }
+          - { build: 'distcheck' }
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Homebrew packages
+        run: brew install automake libtool gcc
+
+      - name: Run test script
+        env:
+          # Override workflow environment variables with matrix ones.
+          # See: https://docs.github.com/en/actions/learn-github-actions/expressions#example.
+          BUILD: ${{ matrix.build != '' && matrix.build || env.BUILD }}
+          ECMULTWINDOW: ${{ matrix.ecmultwindow != '' && matrix.ecmultwindow || env.ECMULTWINDOW }}
+          ECMULTGENPRECISION: ${{ matrix.ecmultgenprecision != '' && matrix.ecmultgenprecision || env.ECMULTGENPRECISION }}
+          WIDEMUL: ${{ matrix.widemul != '' && matrix.widemul || env.WIDEMUL }}
+          ECDH: ${{ matrix.ecdh != '' && matrix.ecdh || env.ECDH }}
+          RECOVERY: ${{ matrix.recovery != '' && matrix.recovery || env.RECOVERY }}
+          SCHNORRSIG: ${{ matrix.schnorrsig != '' && matrix.schnorrsig || env.SCHNORRSIG }}
+          ELLSWIFT: ${{ matrix.ellswift != '' && matrix.ellswift || env.ELLSWIFT }}
+          CC: ${{ matrix.cc != '' && matrix.cc || env.CC }}
+          CPPFLAGS: ${{ matrix.cppflags != '' && matrix.cppflags || env.CPPFLAGS }}
+        run: ./ci/cirrus.sh
+
+      - run: cat tests.log || true
+        if: ${{ always() }}
+      - run: cat noverify_tests.log || true
+        if: ${{ always() }}
+      - run: cat exhaustive_tests.log || true
+        if: ${{ always() }}
+      - run: cat ctime_tests.log || true
+        if: ${{ always() }}
+      - run: cat bench.log || true
+        if: ${{ always() }}
+      - run: cat config.log || true
+        if: ${{ always() }}
+      - run: cat test_env.log || true
+        if: ${{ always() }}
+      - run: env
+        if: ${{ always() }}
