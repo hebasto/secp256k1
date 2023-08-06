@@ -1,0 +1,11 @@
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  log_event:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - run: |
+          echo "$GITHUB_REF_NAME"
+          cat "$GITHUB_EVENT_PATH"
