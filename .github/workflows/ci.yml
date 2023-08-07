@@ -7,6 +7,36 @@ on:
     tags-ignore:
       - '**'
 
+env:
+  ### compiler options
+  HOST:
+  WRAPPER_CMD:
+  # Specific warnings can be disabled with -Wno-error=foo.
+  # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.
+  WERROR_CFLAGS: '-Werror -pedantic-errors'
+  MAKEFLAGS: '-j4'
+  BUILD: 'check'
+  ### secp256k1 config
+  ECMULTWINDOW: 'auto'
+  ECMULTGENPRECISION: 'auto'
+  ASM: 'no'
+  WIDEMUL: 'auto'
+  WITH_VALGRIND: 'yes'
+  EXTRAFLAGS:
+  ### secp256k1 modules
+  EXPERIMENTAL: 'no'
+  ECDH: 'no'
+  RECOVERY: 'no'
+  SCHNORRSIG: 'no'
+  ELLSWIFT: 'no'
+  ### test options
+  SECP256K1_TEST_ITERS:
+  BENCH: 'yes'
+  SECP256K1_BENCH_ITERS: 2
+  CTIMETESTS: 'yes'
+  # Compile and run the examples.
+  EXAMPLES: 'yes'
+
 jobs:
   check_dependencies:
     runs-on: ubuntu-latest
@@ -47,3 +77,59 @@ jobs:
       packages: write
     needs: check_dependencies
     if: needs.check_dependencies.outputs.image_invalidated
+
+  x86_64_debian_stable:
+    name: "x86_64: Linux (Debian stable)"
+    runs-on: ubuntu-latest
+    needs: [check_dependencies, docker_image]
+    container: ghcr.io/${{ github.repository_owner }}/secp256k1-ci-image:${{ needs.check_dependencies.outputs.image_tag }}
+    if: ${{ always() }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        env_var:
+          - 'WIDEMUL=int64  RECOVERY=yes'
+          - 'WIDEMUL=int64               ECDH=yes SCHNORRSIG=yes ELLSWIFT=yes'
+          - 'WIDEMUL=int128'
+          - 'WIDEMUL=int128_struct                               ELLSWIFT=yes'
+          - 'WIDEMUL=int128 RECOVERY=yes          SCHNORRSIG=yes ELLSWIFT=yes'
+          - 'WIDEMUL=int128              ECDH=yes SCHNORRSIG=yes'
+          - 'WIDEMUL=int128 ASM=x86_64                           ELLSWIFT=yes'
+          - '               RECOVERY=yes          SCHNORRSIG=yes'
+          - 'CTIMETESTS=no  RECOVERY=yes ECDH=yes SCHNORRSIG=yes CPPFLAGS=-DVERIFY'
+          - 'BUILD=distcheck WITH_VALGRIND=no CTIMETESTS=no BENCH=no'
+          - 'CPPFLAGS=-DDETERMINISTIC'
+          - 'CFLAGS=-O0     CTIMETESTS=no'
+          - 'CFLAGS=-O1     RECOVERY=yes ECDH=yes SCHNORRSIG=yes ELLSWIFT=yes'
+          - 'ECMULTGENPRECISION=2 ECMULTWINDOW=2'
+          - 'ECMULTGENPRECISION=8 ECMULTWINDOW=4'
+        cc: ['gcc', 'clang', 'gcc-snapshot', 'clang-snapshot']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run test script
+        env:
+          CC: ${{ matrix.cc }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          env ${{ matrix.env_var }} ./ci/cirrus.sh
+
+      - run: cat tests.log || true
+        if: ${{ always() }}
+      - run: cat noverify_tests.log || true
+        if: ${{ always() }}
+      - run: cat exhaustive_tests.log || true
+        if: ${{ always() }}
+      - run: cat ctime_tests.log || true
+        if: ${{ always() }}
+      - run: cat bench.log || true
+        if: ${{ always() }}
+      - run: cat config.log || true
+        if: ${{ always() }}
+      - run: cat test_env.log || true
+        if: ${{ always() }}
+      - run: env
+        if: ${{ always() }}
