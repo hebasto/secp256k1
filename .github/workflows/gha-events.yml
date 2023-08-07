@@ -6,6 +6,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get modified files
+        env:
+          COMMIT_BEFORE: ${{ github.event_name != 'pull_request' && github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before || github.event.repository.default_branch) }}
+        run: |
+          git fetch --depth=1 origin "$COMMIT_BEFORE"
+          echo "modified_files=$(git diff --name-only FETCH_HEAD ${{ github.sha }} | xargs)"
+
       - run: |
           echo "$GITHUB_REF_NAME"
           cat "$GITHUB_EVENT_PATH"
