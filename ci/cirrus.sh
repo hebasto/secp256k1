@@ -4,6 +4,10 @@ set -eux
 
 export LC_ALL=C
 
+if [ "$GITHUB_ACTIONS" = "true" ]; then
+    git config --global --add safe.directory "$GITHUB_WORKSPACE"
+fi
+
 # Print commit and relevant CI environment to allow reproducing the job outside of CI.
 git show --no-patch
 print_environment() {
