@@ -1,0 +1,49 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
+
+jobs:
+  check_dependencies:
+    runs-on: ubuntu-latest
+    outputs:
+      image_invalidated: ${{ steps.check.outputs.image_invalidated}}
+      image_tag: ${{ steps.check.outputs.image_tag}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check Docker image dependencies
+        id: check
+        env:
+          COMMIT_BEFORE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before || github.event.repository.default_branch) }}
+          DOCKER_IMAGE_DEPENDENCIES: '.github/workflows/docker.yml ci/linux-debian.Dockerfile'
+        run: |
+          git fetch --depth=1 origin "$COMMIT_BEFORE"
+          modified_files=$(git diff --name-only FETCH_HEAD ${{ github.sha }} | xargs)
+          read -r -a dependencies <<< "$DOCKER_IMAGE_DEPENDENCIES"
+          for file in "${dependencies[@]}"; do
+              if [[ "$modified_files" == *"$file"* ]]; then
+                  deps_modified=true
+                  break
+              fi
+          done
+          echo "image_invalidated=$deps_modified" >> "$GITHUB_OUTPUT"
+          if [ -n "$deps_modified" ]; then
+            echo "image_tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "image_tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+  docker_image:
+    uses: ./.github/workflows/docker.yml
+    with:
+      image_tag: ${{ github.ref_name }}
+    permissions:
+      packages: write
+    needs: check_dependencies
+    if: needs.check_dependencies.outputs.image_invalidated
