@@ -1,0 +1,98 @@
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: 'Dockerfile that defines an image'
+        required: true
+        type: string
+      tag:
+        description: 'Tag of an image'
+        default: ci-image
+        required: false
+        type: string
+      common_env_vars:
+        description: 'Environment variables provided by a caller workflow as a JSON object'
+        required: false
+        type: string
+      matrix_env_vars:
+        description: 'Environment variables provided by a matrix as a JSON object'
+        required: false
+        type: string
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    env: ${{ fromJSON(inputs.common_env_vars) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Set environment variables
+        run: |
+          for var in "$(echo '${{ inputs.matrix_env_vars }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')"; do
+            echo "$var" >> "$GITHUB_ENV"
+          done
+          echo "MAKEFLAGS=-j$(($(nproc) + 1))" >> "$GITHUB_ENV"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build container
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ${{ inputs.dockerfile }}
+          tags: ${{ inputs.tag }}
+          push: false
+          load: true
+          cache-from: type=gha
+
+      - name: CI script
+        run: >
+          docker run \
+            $(echo '${{ toJSON(env) }}' | jq -r 'keys[] | "-e \(.)"' | paste -sd " ") \
+            --volume ${{ github.workspace }}:${{ github.workspace }} \
+            --workdir ${{ github.workspace }} \
+            ${{ inputs.tag }} bash -c " \
+              git config --global --add safe.directory ${{ github.workspace }} && \
+              ./ci/cirrus.sh \
+            "
+
+      - name: tests.log
+        run: |
+          cat tests.log || true
+        if: ${{ always() }}
+
+      - name: noverify_tests.log
+        run: |
+          cat noverify_tests.log || true
+        if: ${{ always() }}
+
+      - name: exhaustive_tests.log
+        run: |
+          cat exhaustive_tests.log || true
+        if: ${{ always() }}
+
+      - name: ctime_tests.log
+        run: |
+          cat ctime_tests.log || true
+        if: ${{ always() }}
+
+      - name: bench.log
+        run: |
+          cat bench.log || true
+        if: ${{ always() }}
+
+      - name: config.log
+        run: |
+          cat config.log || true
+        if: ${{ always() }}
+
+      - name: test_env.log
+        run: |
+          cat test_env.log || true
+        if: ${{ always() }}
+
+      - name: CI env
+        run:  env
+        if: ${{ always() }}
