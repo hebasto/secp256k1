@@ -91,7 +91,7 @@ jobs:
           tag: linux-debian-wine-image
           command: >
             git config --global --add safe.directory ${{ github.workspace }} &&
-            ./ci/cirrus.sh
+            ./ci/ci.sh
 
       - run: cat tests.log || true
         if: ${{ always() }}
@@ -172,7 +172,7 @@ jobs:
           tag: linux-debian-wine-image
           command: >
             git config --global --add safe.directory ${{ github.workspace }} &&
-            ./ci/cirrus.sh
+            ./ci/ci.sh
 
       - run: cat tests.log || true
         if: ${{ always() }}
