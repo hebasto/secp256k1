@@ -1,0 +1,40 @@
+name: 'CI script in Docker'
+description: 'Run a CI script in a Docker container'
+inputs:
+  dockerfile:
+    description: 'A Dockerfile that defines an image'
+    required: true
+  tag:
+    description: 'A tag of an image'
+    required: true
+  command:
+    description: 'A command to run in a container'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        for var in "$(echo '${{ toJSON(matrix.configuration.env_vars) }}' | jq -r 'to_entries | .[] | "\(.key)=\(.value)"')"; do
+          echo "$var" >> "$GITHUB_ENV"
+        done
+        echo "MAKEFLAGS=-j$(($(nproc) + 1))" >> "$GITHUB_ENV"
+      shell: bash
+
+    - uses: docker/setup-buildx-action@v2
+
+    - uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ${{ inputs.dockerfile }}
+        tags: ${{ inputs.tag }}
+        push: false
+        load: true
+        cache-from: type=gha
+
+    - run: >
+        docker run \
+          $(echo '${{ toJSON(env) }}' | jq -r 'keys[] | "-e \(.)"' | paste -sd " ") \
+          --volume ${{ github.workspace }}:${{ github.workspace }} \
+          --workdir ${{ github.workspace }} \
+          ${{ inputs.tag }} bash -c "${{ inputs.command }}"
+      shell: bash
