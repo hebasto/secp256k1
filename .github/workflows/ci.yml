@@ -8,9 +8,209 @@ on:
       - '**'
 
 env:
+  ### compiler options
+  HOST:
+  WRAPPER_CMD:
+  # Specific warnings can be disabled with -Wno-error=foo.
+  # -pedantic-errors is not equivalent to -Werror=pedantic and thus not implied by -Werror according to the GCC manual.
+  WERROR_CFLAGS: '-Werror -pedantic-errors'
+  MAKEFLAGS: '-j4'
+  BUILD: 'check'
+  ### secp256k1 config
+  ECMULTWINDOW: 'auto'
+  ECMULTGENPRECISION: 'auto'
+  ASM: 'no'
+  WIDEMUL: 'auto'
+  WITH_VALGRIND: 'yes'
+  EXTRAFLAGS:
+  ### secp256k1 modules
+  EXPERIMENTAL: 'no'
+  ECDH: 'no'
+  RECOVERY: 'no'
+  SCHNORRSIG: 'no'
+  ELLSWIFT: 'no'
+  ### test options
+  SECP256K1_TEST_ITERS:
+  BENCH: 'yes'
   SECP256K1_BENCH_ITERS: 2
+  CTIMETESTS: 'yes'
+  # Compile and run the examples.
+  EXAMPLES: 'yes'
 
 jobs:
+  docker_wine_cache:
+    name: "Build MinGW/MSVC Debian image"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          # See: https://github.com/moby/buildkit/issues/3969.
+          driver-opts: |
+            network=host
+
+      - name: Build container
+        uses: docker/build-push-action@v4
+        with:
+          file: ./ci/linux-debian-wine.Dockerfile
+          tags: linux-debian-wine-image
+          push: false
+          load: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
+
+  mingw_debian:
+    name: ${{ matrix.configuration.job_name }}
+    runs-on: ubuntu-latest
+    needs: docker_wine_cache
+
+    env:
+      WRAPPER_CMD: 'wine'
+      WITH_VALGRIND: 'no'
+      ECDH: 'yes'
+      RECOVERY: 'yes'
+      SCHNORRSIG: 'yes'
+      CTIMETESTS: 'no'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - job_name: 'x86_64 (mingw32-w64): Windows (Debian stable, Wine)'
+            env_vars:
+              HOST: 'x86_64-w64-mingw32'
+          - job_name: 'i686 (mingw32-w64): Windows (Debian stable, Wine)'
+            env_vars:
+              HOST: 'i686-w64-mingw32'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: CI script
+        env: ${{ matrix.configuration.env_vars }}
+        uses: ./.github/actions/run-in-docker-action
+        with:
+          dockerfile: ./ci/linux-debian-wine.Dockerfile
+          tag: linux-debian-wine-image
+          command: >
+            git config --global --add safe.directory ${{ github.workspace }} &&
+            ./ci/cirrus.sh
+
+      - run: cat tests.log || true
+        if: ${{ always() }}
+      - run: cat noverify_tests.log || true
+        if: ${{ always() }}
+      - run: cat exhaustive_tests.log || true
+        if: ${{ always() }}
+      - run: cat ctime_tests.log || true
+        if: ${{ always() }}
+      - run: cat bench.log || true
+        if: ${{ always() }}
+      - run: cat config.log || true
+        if: ${{ always() }}
+      - run: cat test_env.log || true
+        if: ${{ always() }}
+      - name: CI env
+        run: env
+        if: ${{ always() }}
+
+  msvc_debian:
+    name: ${{ matrix.configuration.job_name }}
+    runs-on: ubuntu-latest
+    needs: docker_wine_cache
+
+    env:
+      WRAPPER_CMD: 'wine'
+      WERROR_CFLAGS: '-WX'
+      WITH_VALGRIND: 'no'
+      ECDH: 'yes'
+      RECOVERY: 'yes'
+      EXPERIMENTAL: 'yes'
+      SCHNORRSIG: 'yes'
+      ELLSWIFT: 'yes'
+      CTIMETESTS: 'no'
+      # Use a MinGW-w64 host to tell ./configure we're building for Windows.
+      # This will detect some MinGW-w64 tools but then make will need only
+      # the MSVC tools CC, AR and NM as specified below.
+      HOST: 'x86_64-w64-mingw32'
+      CC: '/opt/msvc/bin/x64/cl'
+      AR: '/opt/msvc/bin/x64/lib'
+      NM: '/opt/msvc/bin/x64/dumpbin -symbols -headers'
+      # Set non-essential options that affect the CLI messages here.
+      # (They depend on the user's taste, so we don't want to set them automatically in configure.ac.)
+      CFLAGS: '-nologo -diagnostics:caret'
+      LDFLAGS: '-Xlinker -Xlinker -Xlinker -nologo'
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration:
+          - job_name: 'x86_64 (MSVC): Windows (Debian stable, Wine)'
+            env_vars: {}
+          - job_name: 'x86_64 (MSVC): Windows (Debian stable, Wine, int128_struct)'
+            env_vars:
+              WIDEMUL: 'int128_struct'
+          - job_name: 'x86_64 (MSVC): Windows (Debian stable, Wine, int128_struct with __(u)mulh)'
+            env_vars:
+              WIDEMUL: 'int128_struct'
+              CPPFLAGS: '-DSECP256K1_MSVC_MULH_TEST_OVERRIDE'
+          - job_name: 'i686 (MSVC): Windows (Debian stable, Wine)'
+            env_vars:
+              HOST: 'i686-w64-mingw32'
+              CC: '/opt/msvc/bin/x86/cl'
+              AR: '/opt/msvc/bin/x86/lib'
+              NM: '/opt/msvc/bin/x86/dumpbin -symbols -headers'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: CI script
+        env: ${{ matrix.configuration.env_vars }}
+        uses: ./.github/actions/run-in-docker-action
+        with:
+          dockerfile: ./ci/linux-debian-wine.Dockerfile
+          tag: linux-debian-wine-image
+          command: >
+            git config --global --add safe.directory ${{ github.workspace }} &&
+            ./ci/cirrus.sh
+
+      - run: cat tests.log || true
+        if: ${{ always() }}
+      - run: cat noverify_tests.log || true
+        if: ${{ always() }}
+      - run: cat exhaustive_tests.log || true
+        if: ${{ always() }}
+      - run: cat ctime_tests.log || true
+        if: ${{ always() }}
+      - run: cat bench.log || true
+        if: ${{ always() }}
+      - run: cat config.log || true
+        if: ${{ always() }}
+      - run: cat test_env.log || true
+        if: ${{ always() }}
+      - name: CI env
+        run: env
+        if: ${{ always() }}
+
+  msvc_debian_headers:
+    name: "C++ (public headers)"
+    runs-on: ubuntu-latest
+    needs: docker_wine_cache
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test headers
+        uses: ./.github/actions/run-in-docker-action
+        with:
+          dockerfile: ./ci/linux-debian-wine.Dockerfile
+          tag: linux-debian-wine-image
+          command: >
+            /opt/msvc/bin/x64/cl.exe -c -WX -TP include/*.h
+
   win64-native:
     name: "x86_64: Windows, VS 2022"
     # See: https://github.com/actions/runner-images#available-images.
