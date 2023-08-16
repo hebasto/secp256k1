@@ -139,6 +139,7 @@ task:
     - env: {BUILD: distcheck}
   brew_script:
     - brew install automake libtool gcc
+    - ln -sf /usr/local/bin/gcc-* /usr/bin/gcc
   test_script:
     - ./ci/cirrus.sh
   << : *CAT_LOGS
