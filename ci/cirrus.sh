@@ -31,12 +31,20 @@ print_environment() {
 }
 print_environment
 
-# Start persistent wineserver if necessary.
-# This speeds up jobs with many invocations of wine (e.g., ./configure with MSVC) tremendously.
 case "$WRAPPER_CMD" in
     *wine*)
+        # Initialize the wine environment.
+        wine64 wineboot --init
+
+        # Wait until the wineserver process has
+        # exited, to avoid corrupting the wine prefix.
+        while (ps -A | grep wineserver) > /dev/null; do sleep 1; done
+
         # Make sure to shutdown wineserver whenever we exit.
         trap "wineserver -k || true" EXIT INT HUP
+
+        # Start persistent wineserver if necessary.
+        # This speeds up jobs with many invocations of wine tremendously.
         wineserver -p
         ;;
 esac
