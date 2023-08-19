@@ -60,6 +60,15 @@ jobs:
           tags: linux-debian-image
           cache-from: type=gha
           cache-to: type=gha,mode=min
+          outputs: type=docker,dest=${{ runner.temp }}/linux-debian.tar
+
+      - name: Upload image
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-debian
+          path: ${{ runner.temp }}/linux-debian.tar
+          if-no-files-found: error
+          retention-days: 1
 
   linux_debian:
     name: "x86_64: Linux (Debian stable)"
@@ -102,7 +111,7 @@ jobs:
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
         with:
-          dockerfile: ./ci/linux-debian.Dockerfile
+          artifact: linux-debian
           tag: linux-debian-image
           command: >
             git config --global --add safe.directory ${{ github.workspace }} &&
@@ -159,7 +168,7 @@ jobs:
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
         with:
-          dockerfile: ./ci/linux-debian.Dockerfile
+          artifact: linux-debian
           tag: linux-debian-image
           command: >
             git config --global --add safe.directory ${{ github.workspace }} &&
