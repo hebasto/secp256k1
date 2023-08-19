@@ -20,7 +20,8 @@ runs:
 
     - # Tell Docker to pass environment variables in `env` into the container.
       run: >
-        docker load --input /tmp/myimage.tar && \
+        which docker &&
+        docker load --input /tmp/myimage.tar &&
         docker run \
           $(echo '${{ toJSON(env) }}' | jq -r 'keys[] | "--env \(.) "') \
           --volume ${{ github.workspace }}:${{ github.workspace }} \
