@@ -58,8 +58,15 @@ jobs:
         with:
           file: ./ci/linux-debian.Dockerfile
           tags: linux-debian-image
+          outputs: type=docker,dest=/tmp/myimage.tar
           cache-from: type=gha
           cache-to: type=gha,mode=min
+
+      - name: Upload image
+        uses: actions/upload-artifact@v3
+        with:
+          name: myimage
+          path: /tmp/myimage.tar
 
   linux_debian:
     name: "x86_64: Linux (Debian stable)"
