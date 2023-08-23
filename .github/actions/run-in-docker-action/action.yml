@@ -9,7 +9,10 @@ inputs:
     required: true
   command:
     description: 'A command to run in a container'
-    required: true
+    required: false
+    default: |
+      git config --global --add safe.directory ${{ github.workspace }}
+      ./ci/ci.sh
 runs:
   using: "composite"
   steps:
