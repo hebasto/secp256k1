@@ -580,9 +580,6 @@ jobs:
     runs-on: macos-13 # Use M1 once available https://github.com/github/roadmap/issues/528
 
     env:
-      ASM: 'no'
-      WITH_VALGRIND: 'no'
-      CTIMETESTS: 'no'
       CC: 'clang'
 
     strategy:
@@ -595,8 +592,8 @@ jobs:
           - { WIDEMUL: 'int128',                  ECDH: 'yes', SCHNORRSIG: 'yes', ELLSWIFT: 'yes' }
           - { WIDEMUL: 'int128', RECOVERY: 'yes',              SCHNORRSIG: 'yes' }
           - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', SCHNORRSIG: 'yes', ELLSWIFT: 'yes', CC: 'gcc' }
-          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', SCHNORRSIG: 'yes', ELLSWIFT: 'yes', CPPFLAGS: '-DVERIFY' }
-          - BUILD: 'distcheck'
+          - { WIDEMUL: 'int128', RECOVERY: 'yes', ECDH: 'yes', SCHNORRSIG: 'yes', ELLSWIFT: 'yes', CPPFLAGS: '-DVERIFY', WITH_VALGRIND: 'no', CTIMETESTS: 'no' }
+          - { BUILD: 'distcheck',  WITH_VALGRIND: 'no', CTIMETESTS: 'no' }
 
     steps:
       - name: Checkout
@@ -609,6 +606,8 @@ jobs:
         run: |
           brew install automake libtool gcc
           ln -s $(brew --prefix gcc)/bin/gcc-?? /usr/local/bin/gcc
+          brew tap LouisBrunner/valgrind
+          brew install --HEAD LouisBrunner/valgrind/valgrind
 
       - name: CI script
         env: ${{ matrix.env_vars }}
