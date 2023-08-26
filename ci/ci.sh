@@ -114,7 +114,7 @@ fi
 if [ "$CTIMETESTS" = "yes" ]
 then
     if [ "$WITH_VALGRIND" = "yes" ]; then
-        ./libtool --mode=execute valgrind --error-exitcode=42 --suppressions=./ci/macos-ventura.supp ./ctime_tests > ctime_tests.log 2>&1
+        ./libtool --mode=execute valgrind --error-exitcode=42 --gen-suppressions=all ./ctime_tests > ctime_tests.log 2>&1
     else
         $EXEC ./ctime_tests > ctime_tests.log 2>&1
     fi
