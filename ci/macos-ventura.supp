@@ -10,12 +10,3 @@
    fun:__map_with_linking_np
    ...
 }
-
-# Suppress "Conditional jump or move depends on uninitialised value(s)"
-# in /usr/lib/libSystem.B.dylib.
-{
-   macos13-System.B
-   Memcheck:Cond
-   ...
-   fun:libSystem_initializer
-}
