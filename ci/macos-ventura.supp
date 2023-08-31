@@ -1,0 +1,12 @@
+# Suppressions for macOS 13 Ventura
+
+
+# Supress "Syscall param map_with_linking_np(link_info) points to uninitialised byte(s)"
+# in /usr/lib/dyld.
+{
+   macos13-dyld-param
+   Memcheck:Param
+   map_with_linking_np(link_info)
+   fun:__map_with_linking_np
+   ...
+}
