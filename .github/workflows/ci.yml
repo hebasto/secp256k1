@@ -775,7 +775,7 @@ jobs:
 
       - name: Test script
         run: |
-          ./tools/check_header.sh src/field.h
+          ./tools/check_header.sh src/field.h src/field_5x52.h src/field_10x26.h
 
   sage:
     name: "SageMath prover"
