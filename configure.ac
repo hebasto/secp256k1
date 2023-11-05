@@ -125,8 +125,6 @@ AC_DEFUN([SECP_TRY_APPEND_DEFAULT_CFLAGS], [
       SECP_TRY_APPEND_CFLAGS([-wd4146], $1) # Disable warning C4146 "unary minus operator applied to unsigned type, result still unsigned".
       SECP_TRY_APPEND_CFLAGS([-wd4244], $1) # Disable warning C4244 "'conversion' conversion from 'type1' to 'type2', possible loss of data".
       SECP_TRY_APPEND_CFLAGS([-wd4267], $1) # Disable warning C4267 "'var' : conversion from 'size_t' to 'type', possible loss of data".
-      # Eliminate deprecation warnings for the older, less secure functions.
-      CPPFLAGS="-D_CRT_SECURE_NO_WARNINGS $CPPFLAGS"
     fi
 ])
 SECP_TRY_APPEND_DEFAULT_CFLAGS(SECP_CFLAGS)
