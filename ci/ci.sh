@@ -83,7 +83,19 @@ esac
     --host="$HOST" $EXTRAFLAGS
 
 # We have set "-j<n>" in MAKEFLAGS.
-make
+build_exit_code=0
+make 2> >(tee make.log >&2) || build_exit_code=$?
+if [ $build_exit_code -ne 0 ]; then
+    case $CC in
+        *snapshot*)
+            grep -e "internal compiler error:" -e "PLEASE submit a bug report" make.log
+            return $?;
+            ;;
+        *)
+            return 1;
+            ;;
+    esac
+fi
 
 # Print information about binaries so that we can see that the architecture is correct
 file *tests* || true
