@@ -27,6 +27,7 @@ env:
   BENCH: yes
   SECP256K1_BENCH_ITERS: 2
   CTIMETESTS: yes
+  SYMBOL_CHECK: yes
   # Compile and run the tests
   EXAMPLES: yes
 
