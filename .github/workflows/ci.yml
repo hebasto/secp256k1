@@ -499,7 +499,6 @@ jobs:
       CTIMETESTS: 'yes'
       CC: 'clang'
       SECP256K1_TEST_ITERS: 32
-      ASM: 'no'
       WITH_VALGRIND: 'no'
 
     steps:
