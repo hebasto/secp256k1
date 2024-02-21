@@ -23,7 +23,7 @@ env:
   ### secp256k1 config
   ECMULTWINDOW: 'auto'
   ECMULTGENPRECISION: 'auto'
-  ASM: 'no'
+  ASM: 'yes'
   WIDEMUL: 'auto'
   WITH_VALGRIND: 'yes'
   EXTRAFLAGS:
