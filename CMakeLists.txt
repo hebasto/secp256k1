@@ -7,6 +7,7 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.15)
   cmake_policy(SET CMP0092 NEW)
 endif()
 
+set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_LIST_DIR}/cmake/OverrideC.cmake)
 project(libsecp256k1
   # The package (a.k.a. release) version is based on semantic versioning 2.0.0 of
   # the API. All changes in experimental modules are treated as
@@ -16,6 +17,7 @@ project(libsecp256k1
   HOMEPAGE_URL "https://github.com/bitcoin-core/secp256k1"
   LANGUAGES C
 )
+unset(CMAKE_USER_MAKE_RULES_OVERRIDE_C)
 
 if(CMAKE_VERSION VERSION_LESS 3.21)
   # Emulates CMake 3.21+ behavior.
@@ -184,8 +186,6 @@ else()
   string(REGEX REPLACE "-DNDEBUG[ \t\r\n]*" "" CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
   string(REGEX REPLACE "-DNDEBUG[ \t\r\n]*" "" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
   string(REGEX REPLACE "-DNDEBUG[ \t\r\n]*" "" CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL}")
-  # Prefer -O2 optimization level. (-O3 is CMake's default for Release for many compilers.)
-  string(REGEX REPLACE "-O3([ \t\r\n]*)" "-O2\\1" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
 
 # Define custom "Coverage" build type.
