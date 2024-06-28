@@ -131,6 +131,8 @@ AC_DEFUN([SECP_TRY_APPEND_DEFAULT_CFLAGS], [
 ])
 SECP_TRY_APPEND_DEFAULT_CFLAGS(SECP_CFLAGS)
 
+SECP_TRY_APPEND_LDFLAGS([-Wl,--no-undefined], [SECP_LIB_LDFLAGS])
+
 ###
 ### Define config arguments
 ###
@@ -486,6 +488,7 @@ echo "  CC                      = $CC"
 echo "  CPPFLAGS                = $CPPFLAGS"
 echo "  SECP_CFLAGS             = $SECP_CFLAGS"
 echo "  CFLAGS                  = $CFLAGS"
+echo "  SECP_LIB_LDFLAGS        = $SECP_LIB_LDFLAGS"
 echo "  LDFLAGS                 = $LDFLAGS"
 
 if test x"$print_msan_notice" = x"yes"; then
