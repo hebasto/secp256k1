@@ -9,7 +9,7 @@ function(add_example name)
     $<$<PLATFORM_ID:Windows>:bcrypt>
   )
   set(test_name ${name}_example)
-  add_test(NAME ${test_name} COMMAND ${target_name})
+  add_test(NAME ${SECP256K1_TESTNAME_PREFIX}${test_name} COMMAND ${target_name})
   if(BUILD_SHARED_LIBS AND MSVC)
     # The DLL must reside either in the same folder where the executable is
     # or somewhere in PATH. Using the latter option.
