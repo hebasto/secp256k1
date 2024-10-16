@@ -785,8 +785,8 @@ jobs:
       - name: Symbol check
         if: ${{ matrix.configuration.cmake_options != '-A x64 -DBUILD_SHARED_LIBS=OFF' }}
         run: |
-          choco install --yes --no-progress python3
-          refreshenv
+          dir build\bin
+          dir build\bin\RelWithDebInfo
           python -m pip install lief
           python .\tools\symbol-check.py build\bin\RelWithDebInfo\libsecp256k1-2.dll
 
