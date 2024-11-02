@@ -28,9 +28,9 @@ def get_exported_exports(library) -> list[str]:
     if library.format == lief.Binary.FORMATS.ELF:
         return [symbol.name for symbol in library.exported_symbols]
     elif library.format == lief.Binary.FORMATS.PE:
-        return [entry.name for entry in library.get_export().entries]
+        return [function.name for function in library.exported_functions]
     elif library.format == lief.Binary.FORMATS.MACHO:
-        return [symbol.name[1:] for symbol in library.exported_symbols]
+        return [function.name[1:] for function in library.exported_functions]
     raise NotImplementedError(f"Unsupported format: {library.format}")
 
 
