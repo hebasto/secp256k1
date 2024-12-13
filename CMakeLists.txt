@@ -285,7 +285,7 @@ if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   if(SECP256K1_APPEND_CFLAGS)
     # Appending to this low-level rule variable is the only way to
     # guarantee that the flags appear at the end of the command line.
-    string(APPEND CMAKE_C_COMPILE_OBJECT " ${SECP256K1_APPEND_CFLAGS}")
+    string(REPLACE "<FLAGS>" "<FLAGS> ${SECP256K1_APPEND_CFLAGS}" CMAKE_C_COMPILE_OBJECT "${CMAKE_C_COMPILE_OBJECT}")
   endif()
 
   set(SECP256K1_APPEND_LDFLAGS "" CACHE STRING "Linker flags that are appended to the command line after all other flags added by the build system. This variable is intended for debugging and special builds.")
