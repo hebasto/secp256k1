@@ -4,30 +4,10 @@ runs:
   using: "composite"
   steps:
     - run: |
+        brew update
         brew tap LouisBrunner/valgrind
-        brew fetch --HEAD LouisBrunner/valgrind/valgrind
-        echo "CI_HOMEBREW_CELLAR_VALGRIND=$(brew --cellar valgrind)" >> "$GITHUB_ENV"
-      shell: bash
-
-    - run: |
-        sw_vers > valgrind_fingerprint
-        brew --version >> valgrind_fingerprint
-        git -C "$(brew --cache)/valgrind--git" rev-parse HEAD >> valgrind_fingerprint
-        cat valgrind_fingerprint
-      shell: bash
-
-    - uses: actions/cache@v4
-      id: cache
-      with:
-        path: ${{ env.CI_HOMEBREW_CELLAR_VALGRIND }}
-        key: ${{ github.job }}-valgrind-${{ hashFiles('valgrind_fingerprint') }}
-
-    - if: steps.cache.outputs.cache-hit != 'true'
-      run: |
+        pushd "$(brew --repo LouisBrunner/valgrind)"
+        git checkout d14be1d4f76466560ed6515d0f314f0925522456
+        popd
         brew install --HEAD LouisBrunner/valgrind/valgrind
-      shell: bash
-
-    - if: steps.cache.outputs.cache-hit == 'true'
-      run: |
-        brew link valgrind
       shell: bash
