@@ -9,5 +9,5 @@ runs:
         pushd "$(brew --repo LouisBrunner/valgrind)"
         git checkout d14be1d4f76466560ed6515d0f314f0925522456
         popd
-        brew install --HEAD LouisBrunner/valgrind/valgrind
+        brew install LouisBrunner/valgrind/valgrind
       shell: bash
