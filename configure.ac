@@ -431,6 +431,8 @@ fi
 
 if test x"$enable_external_default_callbacks" = x"yes"; then
   SECP_CONFIG_DEFINES="$SECP_CONFIG_DEFINES -DUSE_EXTERNAL_DEFAULT_CALLBACKS=1"
+else
+  SECP_TRY_APPEND_LDFLAGS([-Wl,--no-undefined], [SECP_LIB_LDFLAGS])
 fi
 
 ###
@@ -500,6 +502,7 @@ echo "  CC                      = $CC"
 echo "  CPPFLAGS                = $CPPFLAGS"
 echo "  SECP_CFLAGS             = $SECP_CFLAGS"
 echo "  CFLAGS                  = $CFLAGS"
+echo "  SECP_LIB_LDFLAGS        = $SECP_LIB_LDFLAGS"
 echo "  LDFLAGS                 = $LDFLAGS"
 
 if test x"$print_msan_notice" = x"yes"; then
