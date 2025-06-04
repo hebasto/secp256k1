@@ -69,6 +69,12 @@ endif()
 
 target_link_libraries(secp256k1 PRIVATE secp256k1_objs)
 
+# Object libs don't know if they're being built for a shared or static lib.
+# Grab the PIC property from secp256k1 which knows.
+get_target_property(_use_pic secp256k1 POSITION_INDEPENDENT_CODE)
+set_target_properties(secp256k1_precomputed secp256k1_main PROPERTIES POSITION_INDEPENDENT_CODE ${_use_pic})
+unset(_use_pic)
+
 set_property(TARGET secp256k1 secp256k1_objs PROPERTY INTERFACE_INCLUDE_DIRECTORIES
   # Add the include path for parent projects so that they don't have to manually add it.
   $<BUILD_INTERFACE:$<$<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>:${PROJECT_SOURCE_DIR}/include>>
