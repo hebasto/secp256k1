@@ -67,6 +67,8 @@ if(WIN32)
   target_compile_definitions(secp256k1 INTERFACE $<$<NOT:$<BOOL:${BUILD_SHARED_LIBS}>>:SECP256K1_STATIC>)
 endif()
 
+target_link_libraries(secp256k1 PRIVATE secp256k1_objs)
+
 set_property(TARGET secp256k1 secp256k1_objs PROPERTY INTERFACE_INCLUDE_DIRECTORIES
   # Add the include path for parent projects so that they don't have to manually add it.
   $<BUILD_INTERFACE:$<$<NOT:$<BOOL:${PROJECT_IS_TOP_LEVEL}>>:${PROJECT_SOURCE_DIR}/include>>
