@@ -271,6 +271,11 @@ if(SECP256K1_BUILD_CTIME_TESTS)
   unset(msan_enabled)
 endif()
 
+if(NOT SECP256K1_USE_EXTERNAL_DEFAULT_CALLBACKS)
+  include(TryAppendLinkerFlags)
+  try_append_linker_flags(-Wl,--no-undefined)
+endif()
+
 set(SECP256K1_APPEND_CFLAGS "" CACHE STRING "Compiler flags that are appended to the command line after all other flags added by the build system. This variable is intended for debugging and special builds.")
 if(SECP256K1_APPEND_CFLAGS)
   # Appending to this low-level rule variable is the only way to
