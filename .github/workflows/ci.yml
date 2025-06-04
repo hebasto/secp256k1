@@ -67,8 +67,8 @@ jobs:
           - job_name: 'x86 (MSVC): Windows (VS 2022)'
             cmake_options: '-A Win32'
           - job_name: 'x64 (clang-cl): Windows (VS 2022)'
-            cmake_options: '-T ClangCL'
-          - job_name: 'x64 (clang-cl): Windows (VS 2022)'
+            cmake_options: '-T ClangCL -DSECP256K1_ASM="OFF"'
+          - job_name: 'x64 (clang-cl): Windows (VS 2022, asm)'
             cmake_options: '-T ClangCL -DSECP256K1_ASM="x86_64"'
 
     steps:
@@ -82,24 +82,24 @@ jobs:
         run: cat build\CMakeFiles\CMakeConfigureLog.yaml
 
       - name: Build
-        run: cmake --build build --config RelWithDebInfo -- /p:UseMultiToolTask=true /maxCpuCount
+        run: cmake --build build --config Release -- /p:UseMultiToolTask=true /maxCpuCount
 
       - name: Binaries info
         # Use the bash shell included with Git for Windows.
         shell: bash
         run: |
-          cd build/bin/RelWithDebInfo && file *tests.exe bench*.exe libsecp256k1-*.dll || true
+          cd build/bin/Release && file *tests.exe bench*.exe libsecp256k1-*.dll || true
 
       - name: Symbol check
         if: ${{ ! matrix.configuration.skip_symbol_check }}
         run: |
           py -3 --version
           py -3 -m pip install lief
-          py -3 .\tools\symbol-check.py build\bin\RelWithDebInfo\libsecp256k1-5.dll
+          py -3 .\tools\symbol-check.py build\bin\Release\libsecp256k1-5.dll
 
       - name: Check
         run: |
-          ctest -C RelWithDebInfo --test-dir build -j ([int]$env:NUMBER_OF_PROCESSORS + 1)
-          build\bin\RelWithDebInfo\bench_ecmult.exe
-          build\bin\RelWithDebInfo\bench_internal.exe
-          build\bin\RelWithDebInfo\bench.exe
+          ctest -C Release --test-dir build -j ([int]$env:NUMBER_OF_PROCESSORS + 1)
+          build\bin\Release\bench_ecmult.exe
+          build\bin\Release\bench_internal.exe
+          build\bin\Release\bench.exe
