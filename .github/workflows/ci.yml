@@ -91,7 +91,7 @@ jobs:
           set(CTEST_BINARY_DIRECTORY "$ENV{GITHUB_WORKSPACE}/build")
           # set(CTEST_SUBMIT_URL "https://cdash.org/")
 
-          ctest_start("Experimental" GROUP "${{ github.event_name }}")
+          ctest_start("Experimental")
           set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
           ctest_update()
           ctest_configure(OPTIONS "${{ matrix.configuration.cmake_options }}")
