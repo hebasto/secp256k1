@@ -87,7 +87,7 @@ jobs:
           ctest_start("Experimental" GROUP "${{ github.event_name }}")
           set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
           ctest_update()
-          ctest_configure(OPTIONS ${{ matrix.configuration.cmake_options }})
+          ctest_configure(OPTIONS "${{ matrix.configuration.cmake_options }}")
           ctest_build()
           ctest_test()
           ctest_submit(HTTPHEADER "Authorization: Bearer ${{ secrets.CDASH_ORG_AUTH_TOKEN }}")
