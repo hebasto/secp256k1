@@ -76,6 +76,7 @@ jobs:
       - shell: ctest --build-config Debug --verbose --script {0}
         run: |
           set(CTEST_SITE "github.com")
+          set(CTEST_GIT_COMMAND git)
           set(CTEST_UPDATE_VERSION_ONLY TRUE)
           set(CTEST_BUILD_NAME "${{ matrix.configuration.job_name }}")
           set(CTEST_CHANGE_ID "$ENV{GITHUB_REF}")
