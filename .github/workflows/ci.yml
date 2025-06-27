@@ -82,6 +82,7 @@ jobs:
           set(CTEST_UPDATE_VERSION_ONLY TRUE)
           set(CTEST_BUILD_NAME "${{ matrix.configuration.job_name }}")
           set(CTEST_CMAKE_GENERATOR "Ninja")
+          set(CTEST_USE_LAUNCHERS ON)
           set(CTEST_SOURCE_DIRECTORY "$ENV{GITHUB_WORKSPACE}")
           set(CTEST_BINARY_DIRECTORY "$ENV{GITHUB_WORKSPACE}/build")
           set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
