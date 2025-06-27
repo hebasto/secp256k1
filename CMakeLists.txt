@@ -200,7 +200,7 @@ if(MSVC)
   # For both cl and clang-cl compilers.
   try_append_c_flags(/W3) # Production quality warning level.
   # Eliminate deprecation warnings for the older, less secure functions.
-  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+  # add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
 else()
   try_append_c_flags(-Wall) # GCC >= 2.95 and probably many other compilers.
 endif()  
