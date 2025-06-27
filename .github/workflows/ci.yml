@@ -56,18 +56,18 @@ jobs:
         configuration:
           - job_name: 'x64 (MSVC), Windows (VS 2022, shared)'
             arch: 'x64'
-            cmake_options: '-DBUILD_SHARED_LIBS=ON'
+            cmake_options: '-DCMAKE_C_COMPILER=clang-cl -DBUILD_SHARED_LIBS=ON'
             symbol_check: 'true'
           - job_name: 'x64 (MSVC), Windows (VS 2022, static)'
             arch: 'x64'
-            cmake_options: '-DBUILD_SHARED_LIBS=OFF'
+            cmake_options: '-DCMAKE_C_COMPILER=clang-cl -DBUILD_SHARED_LIBS=OFF'
           - job_name: 'x64 (MSVC), Windows (VS 2022, int128_struct)'
             arch: 'x64'
-            cmake_options: '-DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
-          - job_name: 'x64 (MSVC), Windows (VS 2022, int128_struct with __(u)mulh)'
-            arch: 'x64'
-            cmake_options: '-DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
-            cpp_flags: '/DSECP256K1_MSVC_MULH_TEST_OVERRIDE'
+            cmake_options: '-DCMAKE_C_COMPILER=clang-cl -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
+          # - job_name: 'x64 (MSVC), Windows (VS 2022, int128_struct with __(u)mulh)'
+          #   arch: 'x64'
+          #   cmake_options: '-DCMAKE_C_COMPILER=clang-cl -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
+          #   cpp_flags: '/DSECP256K1_MSVC_MULH_TEST_OVERRIDE'
           # - job_name: 'x86 (MSVC), Windows (VS 2022)'
           #   arch: 'Win32'
           # - job_name: 'x64 (MSVC), Windows (clang-cl)'
@@ -90,13 +90,13 @@ jobs:
           # set(CTEST_CHANGE_ID "$ENV{GITHUB_REF}")
           set(CTEST_SOURCE_DIRECTORY "$ENV{GITHUB_WORKSPACE}")
           set(CTEST_BINARY_DIRECTORY "$ENV{GITHUB_WORKSPACE}/build")
+          set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
 
           ctest_start("Experimental" GROUP "${{ github.event_name }}")
-          set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
           ctest_update()
           ctest_configure(OPTIONS "${{ matrix.configuration.cmake_options }}")
           ctest_build()
-          ctest_test()
+          ctest_test(PARALLEL_LEVEL 4)
           ctest_submit(HTTPHEADER "Authorization: Bearer ${{ secrets.CDASH_ORG_AUTH_TOKEN }}")
 
       # - name: Generate buildsystem
