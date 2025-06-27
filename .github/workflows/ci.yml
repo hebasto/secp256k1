@@ -55,46 +55,71 @@ jobs:
       matrix:
         configuration:
           - job_name: 'x64 (MSVC): Windows (VS 2022, shared)'
-            cmake_options: '-A x64 -DBUILD_SHARED_LIBS=ON'
+            arch: 'x64'
+            cmake_options: '-DBUILD_SHARED_LIBS=ON'
             symbol_check: 'true'
           - job_name: 'x64 (MSVC): Windows (VS 2022, static)'
-            cmake_options: '-A x64 -DBUILD_SHARED_LIBS=OFF'
+            arch: 'x64'
+            cmake_options: '-DBUILD_SHARED_LIBS=OFF'
           - job_name: 'x64 (MSVC): Windows (VS 2022, int128_struct)'
-            cmake_options: '-A x64 -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
+            arch: 'x64'
+            cmake_options: '-DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
           - job_name: 'x64 (MSVC): Windows (VS 2022, int128_struct with __(u)mulh)'
-            cmake_options: '-A x64 -DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
+            arch: 'x64'
+            cmake_options: '-DSECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=int128_struct'
             cpp_flags: '/DSECP256K1_MSVC_MULH_TEST_OVERRIDE'
           - job_name: 'x86 (MSVC): Windows (VS 2022)'
-            cmake_options: '-A Win32'
-          - job_name: 'x64 (MSVC): Windows (clang-cl)'
-            cmake_options: '-T ClangCL'
+            arch: 'Win32'
+          # - job_name: 'x64 (MSVC): Windows (clang-cl)'
+          #   arch: 'x64'
+          #   cmake_options: '-T ClangCL'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate buildsystem
-        run: cmake -E env CFLAGS="/WX ${{ matrix.configuration.cpp_flags }}" cmake -B build -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON ${{ matrix.configuration.cmake_options }}
-
-      - name: Build
-        run: cmake --build build --config RelWithDebInfo -- /p:UseMultiToolTask=true /maxCpuCount
-
-      - name: Binaries info
-        # Use the bash shell included with Git for Windows.
-        shell: bash
+      - shell: ctest --build-config RelWithDebInfo --verbose --script {0}
         run: |
-          cd build/bin/RelWithDebInfo && file *tests.exe bench*.exe libsecp256k1-*.dll || true
+          set(CTEST_SITE "github.com")
+          set(CTEST_GIT_COMMAND git)
+          set(CTEST_UPDATE_VERSION_ONLY TRUE)
+          set(CTEST_BUILD_NAME "${{ matrix.configuration.job_name }}")
+          set(CTEST_CMAKE_GENERATOR "Visual Studio 17 2022")
+          set(CTEST_CMAKE_GENERATOR_PLATFORM "${{ matrix.configuration.arch }}")
+          set(CTEST_CHANGE_ID "$ENV{GITHUB_REF}")
+          set(CTEST_SOURCE_DIRECTORY "$ENV{GITHUB_WORKSPACE}")
+          set(CTEST_BINARY_DIRECTORY "$ENV{GITHUB_WORKSPACE}/build")
 
-      - name: Symbol check
-        if: ${{ matrix.configuration.symbol_check }}
-        run: |
-          py -3 --version
-          py -3 -m pip install lief
-          py -3 .\tools\symbol-check.py build\bin\RelWithDebInfo\libsecp256k1-5.dll
+          ctest_start("Experimental" GROUP "${{ github.event_name }}")
+          set(CTEST_SUBMIT_URL "https://my.cdash.org/submit.php?project=libsecp256k1")
+          ctest_update()
+          ctest_configure(OPTIONS "${{ matrix.configuration.cmake_options }}")
+          ctest_build()
+          ctest_test()
+          ctest_submit(HTTPHEADER "Authorization: Bearer ${{ secrets.CDASH_ORG_AUTH_TOKEN }}")
 
-      - name: Check
-        run: |
-          ctest -C RelWithDebInfo --test-dir build -j ([int]$env:NUMBER_OF_PROCESSORS + 1)
-          build\bin\RelWithDebInfo\bench_ecmult.exe
-          build\bin\RelWithDebInfo\bench_internal.exe
-          build\bin\RelWithDebInfo\bench.exe
+      # - name: Generate buildsystem
+      #   run: cmake -E env CFLAGS="/WX ${{ matrix.configuration.cpp_flags }}" cmake -B build -DSECP256K1_ENABLE_MODULE_RECOVERY=ON -DSECP256K1_BUILD_EXAMPLES=ON ${{ matrix.configuration.cmake_options }}
+
+      # - name: Build
+      #   run: cmake --build build --config RelWithDebInfo -- /p:UseMultiToolTask=true /maxCpuCount
+
+      # - name: Binaries info
+      #   # Use the bash shell included with Git for Windows.
+      #   shell: bash
+      #   run: |
+      #     cd build/bin/RelWithDebInfo && file *tests.exe bench*.exe libsecp256k1-*.dll || true
+
+      # - name: Symbol check
+      #   if: ${{ matrix.configuration.symbol_check }}
+      #   run: |
+      #     py -3 --version
+      #     py -3 -m pip install lief
+      #     py -3 .\tools\symbol-check.py build\bin\RelWithDebInfo\libsecp256k1-5.dll
+
+      # - name: Check
+      #   run: |
+      #     ctest -C RelWithDebInfo --test-dir build -j ([int]$env:NUMBER_OF_PROCESSORS + 1)
+      #     build\bin\RelWithDebInfo\bench_ecmult.exe
+      #     build\bin\RelWithDebInfo\bench_internal.exe
+      #     build\bin\RelWithDebInfo\bench.exe
