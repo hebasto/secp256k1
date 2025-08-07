@@ -119,7 +119,8 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
+      - &print-logs
+        name: Print logs
         uses: ./.github/actions/print-logs
         if: ${{ !cancelled() }}
 
@@ -154,9 +155,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   s390x_debian:
     name: "s390x (big-endian): Linux (Debian stable, QEMU)"
@@ -185,10 +184,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
-
+      - *print-logs
 
   arm32_debian:
     name: "ARM32: Linux (Debian stable, QEMU)"
@@ -225,9 +221,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   arm64-debian:
     name: "arm64: Linux (Debian stable)"
@@ -264,9 +258,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: arm64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   ppc64le_debian:
     name: "ppc64le: Linux (Debian stable, QEMU)"
@@ -295,10 +287,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
-
+      - *print-logs
 
   valgrind_debian:
     name: "Valgrind ${{ matrix.binary_arch }} (memcheck)"
@@ -357,9 +346,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: ${{ matrix.docker_arch }}-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   sanitizers_debian:
     name: "UBSan, ASan, LSan"
@@ -400,9 +387,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   msan_debian:
     name: "MSan"
@@ -450,10 +435,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
-
+      - *print-logs
 
   mingw_debian:
     name: ${{ matrix.configuration.job_name }}
@@ -492,9 +474,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   x86_64-macos-native:
     name: "x86_64: macOS Ventura, Valgrind"
@@ -543,9 +523,7 @@ jobs:
           python3 -m pip install lief
           python3 ./tools/symbol-check.py .libs/libsecp256k1.dylib
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   arm64-macos-native:
     name: "ARM64: macOS Sonoma"
@@ -595,10 +573,7 @@ jobs:
           python3 -m pip install lief
           python3 ./tools/symbol-check.py .libs/libsecp256k1.dylib
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
-
+      - *print-logs
 
   win64-native:
     name: ${{ matrix.configuration.job_name }}
@@ -695,9 +670,7 @@ jobs:
           dockerfile: ./ci/linux-debian.Dockerfile
           tag: x64-debian-image
 
-      - name: Print logs
-        uses: ./.github/actions/print-logs
-        if: ${{ !cancelled() }}
+      - *print-logs
 
   cxx_headers_debian:
     name: "C++ (public headers)"
