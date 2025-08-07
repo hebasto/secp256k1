@@ -112,7 +112,8 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
 
-      - name: CI script
+      - &x64_ci_script
+        name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
         with:
@@ -150,14 +151,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   s390x_debian:
@@ -185,14 +179,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   arm32_debian:
@@ -222,14 +209,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   arm64-debian:
@@ -294,14 +274,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   valgrind_debian:
@@ -394,14 +367,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   msan_debian:
@@ -442,14 +408,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   mingw_debian:
@@ -481,14 +440,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   x86_64-macos-native:
@@ -683,14 +635,7 @@ jobs:
 
     steps:
       - *checkout
-
-      - name: CI script
-        env: ${{ matrix.configuration.env_vars }}
-        uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
-          tag: x64-debian-image
-
+      - *x64_ci_script
       - *print-logs
 
   cxx_headers_debian:
