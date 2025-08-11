@@ -46,6 +46,7 @@ option(SECP256K1_ENABLE_API_VISIBILITY_ATTRIBUTES "Enable visibility attributes 
 
 # We declare all options before processing them, to make sure we can express
 # dependencies while processing.
+# When adding a new module, update the "dev-enable-all-modules" preset accordingly.
 option(SECP256K1_ENABLE_MODULE_ECDH "Enable ECDH module." ON)
 option(SECP256K1_ENABLE_MODULE_RECOVERY "Enable ECDSA pubkey recovery module." OFF)
 option(SECP256K1_ENABLE_MODULE_EXTRAKEYS "Enable extrakeys module." ON)

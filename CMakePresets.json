@@ -2,11 +2,23 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "dev-enable-all-modules",
+      "hidden": true,
+      "cacheVariables": {
+        "SECP256K1_ENABLE_MODULE_ECDH": "ON",
+        "SECP256K1_ENABLE_MODULE_RECOVERY": "ON",
+        "SECP256K1_ENABLE_MODULE_EXTRAKEYS": "ON",
+        "SECP256K1_ENABLE_MODULE_SCHNORRSIG": "ON",
+        "SECP256K1_ENABLE_MODULE_MUSIG": "ON",
+        "SECP256K1_ENABLE_MODULE_ELLSWIFT": "ON"
+      }
+    },
+    {
       "name": "dev-mode",
       "displayName": "Development mode (intended only for developers of the library)",
+      "inherits": "dev-enable-all-modules",
       "cacheVariables": {
         "SECP256K1_EXPERIMENTAL": "ON",
-        "SECP256K1_ENABLE_MODULE_RECOVERY": "ON",
         "SECP256K1_BUILD_EXAMPLES": "ON"
       },
       "warnings": {
