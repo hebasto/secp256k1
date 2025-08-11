@@ -156,34 +156,16 @@ else()
   string(REGEX REPLACE "-O3( |$)" "-O2\\1" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
 endif()
 
-# Define custom "Coverage" build type.
-set(CMAKE_C_FLAGS_COVERAGE "${CMAKE_C_FLAGS_RELWITHDEBINFO} -O0 -DCOVERAGE=1 --coverage" CACHE STRING
-  "Flags used by the C compiler during \"Coverage\" builds."
-  FORCE
-)
-set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
-  "Flags used for linking binaries during \"Coverage\" builds."
-  FORCE
-)
-set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE "${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO} --coverage" CACHE STRING
-  "Flags used by the shared libraries linker during \"Coverage\" builds."
-  FORCE
-)
-mark_as_advanced(
-  CMAKE_C_FLAGS_COVERAGE
-  CMAKE_EXE_LINKER_FLAGS_COVERAGE
-  CMAKE_SHARED_LINKER_FLAGS_COVERAGE
-)
-
 get_property(is_multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
-if(PROJECT_IS_TOP_LEVEL)
+# The custom "Coverage" build type is defined in the CMakePresets.json file.
+if(PROJECT_IS_TOP_LEVEL AND NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
   set(default_build_type "RelWithDebInfo")
   if(CMAKE_GENERATOR STREQUAL "Ninja Multi-Config")
     # Specify the configuration to use by default in the "Ninja Multi-Config" generator.
     set(CMAKE_DEFAULT_BUILD_TYPE ${default_build_type} CACHE STRING "")
   elseif(NOT is_multi_config)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-      STRINGS "${default_build_type}" "Release" "Debug" "MinSizeRel" "Coverage"
+      STRINGS "${default_build_type}" "Release" "Debug" "MinSizeRel"
     )
     if(NOT CMAKE_BUILD_TYPE)
       message(STATUS "Setting build type to \"${default_build_type}\" as none was specified")
@@ -296,12 +278,7 @@ if(SECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY)
 endif()
 message("Optional binaries:")
 message("  benchmark ........................... ${SECP256K1_BUILD_BENCHMARK}")
-message("  noverify_tests ...................... ${SECP256K1_BUILD_TESTS}")
-set(tests_status "${SECP256K1_BUILD_TESTS}")
-if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
-  set(tests_status OFF)
-endif()
-message("  tests ............................... ${tests_status}")
+message("  tests, noverify_tests ............... ${SECP256K1_BUILD_TESTS}")
 message("  exhaustive tests .................... ${SECP256K1_BUILD_EXHAUSTIVE_TESTS}")
 message("  ctime_tests ......................... ${SECP256K1_BUILD_CTIME_TESTS}")
 message("  examples ............................ ${SECP256K1_BUILD_EXAMPLES}")
@@ -322,7 +299,8 @@ message("CFLAGS ................................ ${CMAKE_C_FLAGS}")
 get_directory_property(compile_options COMPILE_OPTIONS)
 string(REPLACE ";" " " compile_options "${compile_options}")
 message("Compile options ....................... " ${compile_options})
-if(NOT is_multi_config)
+# The custom "Coverage" build type is defined in the CMakePresets.json file.
+if(NOT is_multi_config OR CMAKE_BUILD_TYPE STREQUAL "Coverage")
   message("Build type:")
   message(" - CMAKE_BUILD_TYPE ................... ${CMAKE_BUILD_TYPE}")
   string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
