@@ -64,7 +64,8 @@ libsecp256k1.pc
 ### CMake
 /CMakeUserPresets.json
 # Default CMake build directory.
-/build
+/*build*
+!/build-aux
 
 ### Python
 __pycache__/
