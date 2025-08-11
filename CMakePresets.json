@@ -25,6 +25,45 @@
         "dev": true,
         "uninitialized": true
       }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Enable code coverage analysis",
+      "inherits": "dev-enable-all-modules",
+      "binaryDir": "build_coverage",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Coverage",
+        "CMAKE_C_FLAGS_COVERAGE": "-DCOVERAGE -O0 -g --coverage",
+        "CMAKE_EXE_LINKER_FLAGS_COVERAGE": "--coverage",
+        "CMAKE_SHARED_LINKER_FLAGS_COVERAGE": "--coverage",
+        "SECP256K1_BUILD_TESTS": "ON",
+        "SECP256K1_BUILD_EXHAUSTIVE_TESTS": "ON"
+      },
+      "environment": {
+        "CMAKE_CONFIGURATION_TYPES": "Coverage"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "coverage",
+      "displayName": "Build for code coverage analysis",
+      "configurePreset": "coverage",
+      "targets": ["noverify_tests", "exhaustive_tests"],
+      "configuration": "Coverage"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "coverage",
+      "displayName": "Generate data files for code coverage analysis",
+      "configurePreset": "coverage",
+      "configuration": "Coverage",
+      "filter": {
+        "include": {
+          "name": "secp256k1_noverify_tests|secp256k1_exhaustive_tests"
+        }
+      }
     }
   ]
 }
