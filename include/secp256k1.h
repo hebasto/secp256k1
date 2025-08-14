@@ -179,6 +179,8 @@ typedef int (*secp256k1_nonce_function)(
  * some paranoid null checks. */
 # if defined(__GNUC__) && SECP256K1_GNUC_PREREQ(3, 4)
 #  define SECP256K1_WARN_UNUSED_RESULT __attribute__ ((__warn_unused_result__))
+# elif (defined(_MSC_VER) && _MSC_VER >= 1400)
+#  define SECP256K1_WARN_UNUSED_RESULT _Check_return_
 # else
 #  define SECP256K1_WARN_UNUSED_RESULT
 # endif
