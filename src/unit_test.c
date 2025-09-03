@@ -67,6 +67,22 @@ static int parse_arg(const char* key, const char* value, struct TestFramework* t
     return 0;
 }
 
+static void help(void) {
+    printf("Usage: ./tests [options]\n\n");
+    printf("Run the test suite for the project with optional configuration.\n\n");
+    printf("Options:\n");
+    printf("    -help, -h                           Show this help message\n");
+    printf("    -j=<num>, -jobs=<num>               Number of parallel worker processes (default: 0 = sequential)\n");
+    printf("    -iter=<num>, -iterations=<num>      Number of iterations for each test (default: 16)\n");
+    printf("    -seed=<hex>                         Set a specific RNG seed (default: random)\n");
+    printf("\n");
+    printf("Notes:\n");
+    printf("    - All arguments must be provided in the form '-key=value'.\n");
+    printf("    - Unknown arguments are reported but ignored.\n");
+    printf("    - Sequential execution occurs if -jobs=0 or unspecified.\n");
+    printf("    - The first two positional arguments (iterations and seed) are also supported for backward compatibility.\n");
+}
+
 static int parse_jobs_count(const char* key, const char* value, struct Args* out) {
     char* ptr_val;
     long val = strtol(value, &ptr_val, 10); /* base 10 */
@@ -234,6 +250,12 @@ static int tf_init(struct TestFramework* tf, int argc, char** argv)
         if (argc > MAX_ARGS) {
             fprintf(stderr, "Too many command-line arguments (max: %d)\n", MAX_ARGS);
             return EXIT_FAILURE;
+        }
+
+        /* Check if we need to print help */
+        if (argv[1] && (strcmp(argv[1], "-help") == 0 || strcmp(argv[1], "-h") == 0)) {
+            help();
+            exit(EXIT_SUCCESS);
         }
 
         /* Compatibility Note: The first two args were the number of iterations and the seed. */
