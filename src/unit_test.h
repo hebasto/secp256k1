@@ -83,6 +83,8 @@ struct Args {
     const char* custom_seed;
     /* Whether to print the help msg */
     int help;
+    /* Whether to print the tests list msg */
+    int list_tests;
     /* Target tests indexes */
     struct Targets targets;
 };
