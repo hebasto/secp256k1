@@ -134,15 +134,33 @@ if(SECP256K1_BUILD_BENCHMARK)
 endif()
 
 if(SECP256K1_BUILD_TESTS)
-  add_executable(noverify_tests tests.c)
-  target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)
-  add_test(NAME secp256k1_noverify_tests COMMAND noverify_tests)
+  set(test_groups integer hash scalar field group ecmult ecdsa)
+  set(modules_upper ECDH RECOVERY EXTRAKEYS SCHNORRSIG MUSIG ELLSWIFT)
+  list(TRANSFORM modules_upper TOLOWER OUTPUT_VARIABLE modules_lower)
+  foreach(module_upper module_lower IN ZIP_LISTS modules_upper modules_lower)
+    if(SECP256K1_ENABLE_MODULE_${module_upper})
+      list(APPEND test_groups ${module_lower})
+    endif()
+  endforeach()
+
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
     target_compile_definitions(tests PRIVATE VERIFY)
     target_link_libraries(tests secp256k1_precomputed secp256k1_asm)
-    add_test(NAME secp256k1_tests COMMAND tests)
+    foreach(test_group IN LISTS test_groups)
+      add_test(NAME secp256k1_tests::${test_group}
+        COMMAND tests ${test_group}
+      )
+    endforeach()
   endif()
+
+  add_executable(noverify_tests tests.c)
+  target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)
+  foreach(test_group IN LISTS test_groups)
+    add_test(NAME secp256k1_noverify_tests::${test_group}
+      COMMAND noverify_tests ${test_group}
+    )
+  endforeach()
 endif()
 
 if(SECP256K1_BUILD_EXHAUSTIVE_TESTS)
