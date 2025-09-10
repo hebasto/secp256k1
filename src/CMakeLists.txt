@@ -144,8 +144,11 @@ if(SECP256K1_BUILD_TESTS)
   list(APPEND test_targets ecmult_constants)
   list(APPEND test_names   ecmult_constants)
   # Continue with the remaining tests.
-  list(APPEND test_targets general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig utils)
-  list(APPEND test_names   general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig utils)
+  list(APPEND test_targets integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)
+  list(APPEND test_names   integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)
+  # Combine short, trivial tests for log brevity.
+  list(APPEND test_targets "general hash utils")
+  list(APPEND test_names   general_hash_utils)
 
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
