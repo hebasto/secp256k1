@@ -134,10 +134,18 @@ if(SECP256K1_BUILD_BENCHMARK)
 endif()
 
 if(SECP256K1_BUILD_TESTS)
-  set(test_targets ecmult_constants "ecmult_pre_g wnaf point_times_order ecmult_near_split_bound ecmult_chain ecmult_gen_blind ecmult_const_tests ecmult_multi_tests ec_combine")
-  set(test_names   ecmult_constants  ecmult)
-  list(APPEND test_targets general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig ellswift utils)
-  list(APPEND test_names   general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig ellswift utils)
+  set(test_targets "")
+  set(test_names "")
+  # Start with the longest-running tests.
+  list(APPEND test_targets ellswift)
+  list(APPEND test_names   ellswift)
+  list(APPEND test_targets "ecmult_pre_g wnaf point_times_order ecmult_near_split_bound ecmult_chain ecmult_gen_blind ecmult_const_tests ecmult_multi_tests ec_combine")
+  list(APPEND test_names   ecmult)
+  list(APPEND test_targets ecmult_constants)
+  list(APPEND test_names   ecmult_constants)
+  # Continue with the remaining tests.
+  list(APPEND test_targets general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig utils)
+  list(APPEND test_names   general integer hash scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig utils)
 
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
