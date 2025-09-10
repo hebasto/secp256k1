@@ -134,15 +134,32 @@ if(SECP256K1_BUILD_BENCHMARK)
 endif()
 
 if(SECP256K1_BUILD_TESTS)
-  add_executable(noverify_tests tests.c)
-  target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)
-  add_test(NAME secp256k1_noverify_tests COMMAND noverify_tests)
+  set(test_modules general integer hash scalar field group ecmult ec ecdh ecdsa recovery extrakeys schnorrsig musig ellswift utils)
+
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
     target_compile_definitions(tests PRIVATE VERIFY)
     target_link_libraries(tests secp256k1_precomputed secp256k1_asm)
-    add_test(NAME secp256k1_tests COMMAND tests)
+    foreach(test_module IN LISTS test_modules)
+      add_test(NAME secp256k1_tests::${test_module}
+        COMMAND tests -target=${test_module}
+      )
+      set_property(TEST secp256k1_tests::${test_module} PROPERTY
+        SKIP_REGULAR_EXPRESSION "target not found"
+      )
+    endforeach()
   endif()
+
+  add_executable(noverify_tests tests.c)
+  target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)
+  foreach(test_module IN LISTS test_modules)
+    add_test(NAME secp256k1_noverify_tests::${test_module}
+      COMMAND noverify_tests -target=${test_module}
+    )
+    set_property(TEST secp256k1_noverify_tests::${test_module} PROPERTY
+      SKIP_REGULAR_EXPRESSION "target not found"
+    )
+  endforeach()
 endif()
 
 if(SECP256K1_BUILD_EXHAUSTIVE_TESTS)
