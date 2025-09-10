@@ -134,14 +134,31 @@ if(SECP256K1_BUILD_BENCHMARK)
 endif()
 
 if(SECP256K1_BUILD_TESTS)
+  set(test_groups integer hash scalar field group ecmult ecdh ecdsa recovery extrakeys schnorrsig musig ellswift)
+
   add_executable(noverify_tests tests.c)
   target_link_libraries(noverify_tests secp256k1_precomputed secp256k1_asm)
-  add_test(NAME secp256k1_noverify_tests COMMAND noverify_tests)
+  foreach(test_group IN LISTS test_groups)
+    add_test(NAME secp256k1_noverify_tests::${test_group}
+      COMMAND noverify_tests ${test_group}
+    )
+    set_property(TEST secp256k1_noverify_tests::${test_group} PROPERTY
+      SKIP_REGULAR_EXPRESSION "tests skipped."
+    )
+  endforeach()
+
   if(NOT CMAKE_BUILD_TYPE STREQUAL "Coverage")
     add_executable(tests tests.c)
     target_compile_definitions(tests PRIVATE VERIFY)
     target_link_libraries(tests secp256k1_precomputed secp256k1_asm)
-    add_test(NAME secp256k1_tests COMMAND tests)
+    foreach(test_group IN LISTS test_groups)
+      add_test(NAME secp256k1_tests::${test_group}
+        COMMAND tests ${test_group}
+      )
+      set_property(TEST secp256k1_tests::${test_group} PROPERTY
+        SKIP_REGULAR_EXPRESSION "tests skipped."
+      )
+    endforeach()
   endif()
 endif()
 
