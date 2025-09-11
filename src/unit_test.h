@@ -7,6 +7,8 @@
 #ifndef LIBSECP256K1_UNIT_TEST_H
 #define LIBSECP256K1_UNIT_TEST_H
 
+#include "util_local_visibility.h"
+
 /* --------------------------------------------------------- */
 /* Configurable constants                                    */
 /* --------------------------------------------------------- */
@@ -33,6 +35,9 @@
 /* --------------------------------------------------------- */
 /* Test Framework API                                        */
 /* --------------------------------------------------------- */
+
+/* Number of times certain tests will run */
+SECP256K1_LOCAL_VAR int COUNT;
 
 typedef void (*test_fn)(void);
 
@@ -93,7 +98,7 @@ struct TestFramework {
  *   EXIT_SUCCESS (0) on success,
  *   EXIT_FAILURE (non-zero) on error.
  */
-static int tf_init(struct TestFramework* tf, int argc, char** argv);
+int tf_init(struct TestFramework* tf, int argc, char** argv);
 
 /*
  * Run tests based on the provided test framework context.
@@ -106,6 +111,6 @@ static int tf_init(struct TestFramework* tf, int argc, char** argv);
  *   EXIT_SUCCESS (0) if all tests passed,
  *   EXIT_FAILURE (non-zero) otherwise.
  */
-static int tf_run(struct TestFramework* tf);
+int tf_run(struct TestFramework* tf);
 
 #endif /* LIBSECP256K1_UNIT_TEST_H */

@@ -26,7 +26,6 @@
 #include "testutil.h"
 #include "util.h"
 #include "unit_test.h"
-#include "unit_test.c"
 
 #include "../contrib/lax_der_parsing.c"
 #include "../contrib/lax_der_privatekey_parsing.c"

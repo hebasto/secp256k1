@@ -28,7 +28,8 @@
 #endif
 
 #include "unit_test.h"
-#include "testrand.h"
+#include "hash_impl.h"
+#include "testrand_impl.h"
 #include "tests_common.h"
 
 /* Number of times certain tests will run */
@@ -208,7 +209,7 @@ static int run_concurrent(struct TestFramework* tf) {
 }
 #endif
 
-static int tf_init(struct TestFramework* tf, int argc, char** argv)
+int tf_init(struct TestFramework* tf, int argc, char** argv)
 {
     /* Caller must set tf->registry and tf->num_tests before calling tf_init. */
     if (tf->registry_modules == NULL || tf->num_modules <= 0) {
@@ -252,7 +253,7 @@ static int tf_init(struct TestFramework* tf, int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-static int tf_run(struct TestFramework* tf) {
+int tf_run(struct TestFramework* tf) {
     /* Process exit status */
     int status;
     /* Test entry iterator */
