@@ -48,7 +48,18 @@
 #  if __has_feature(memory_sanitizer)
 #    include <sanitizer/msan_interface.h>
 #    define SECP256K1_CHECKMEM_ENABLED 1
+
+#  if defined(__clang__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wuninitialized-const-pointer"
+#  endif
+#    define SECP256K1_CHECKMEM_UNDEFINE_VAR(var, len) __msan_allocated_memory((&var), (len))
+#  if defined(__clang__)
+#    pragma clang diagnostic pop
+#  endif
+
 #    define SECP256K1_CHECKMEM_UNDEFINE(p, len) __msan_allocated_memory((p), (len))
+
 #    define SECP256K1_CHECKMEM_DEFINE(p, len) __msan_unpoison((p), (len))
 #    define SECP256K1_CHECKMEM_MSAN_DEFINE(p, len) __msan_unpoison((p), (len))
 #    define SECP256K1_CHECKMEM_CHECK(p, len) __msan_check_mem_is_initialized((p), (len))
