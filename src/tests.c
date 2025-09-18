@@ -6048,7 +6048,7 @@ static void run_eckey_edge_case_test(void) {
     size_t len;
     /* Group order is too large, reject. */
     CHECK(secp256k1_ec_seckey_verify(CTX, orderc) == 0);
-    SECP256K1_CHECKMEM_UNDEFINE(&pubkey, sizeof(pubkey));
+    SECP256K1_CHECKMEM_UNDEFINE((void *)&pubkey, sizeof(pubkey));
     CHECK(secp256k1_ec_pubkey_create(CTX, &pubkey, orderc) == 0);
     SECP256K1_CHECKMEM_CHECK(&pubkey, sizeof(pubkey));
     CHECK(secp256k1_memcmp_var(&pubkey, zeros, sizeof(secp256k1_pubkey)) == 0);
