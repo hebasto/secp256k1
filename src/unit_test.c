@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if SUPPORTS_CONCURRENCY
+#if defined(SUPPORTS_CONCURRENCY)
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -276,7 +276,7 @@ static int run_sequential(struct TestFramework* tf) {
     return EXIT_SUCCESS;
 }
 
-#if SUPPORTS_CONCURRENCY
+#if defined(SUPPORTS_CONCURRENCY)
 /* Process tests in parallel */
 static int run_concurrent(struct TestFramework* tf) {
     /* Sub-processes info */
@@ -461,7 +461,7 @@ static int tf_run(struct TestFramework* tf) {
     if (tf->args.num_processes <= 1) {
         status = run_sequential(tf);
     } else {
-#if SUPPORTS_CONCURRENCY
+#if defined(SUPPORTS_CONCURRENCY)
         status = run_concurrent(tf);
 #else
         fputs("Parallel execution not supported on your system. Running sequentially...\n", stderr);
