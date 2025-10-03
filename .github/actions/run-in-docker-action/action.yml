@@ -24,7 +24,7 @@ runs:
         file: ${{ inputs.dockerfile }}
         tags: ${{ inputs.tag }}
         load: true
-        cache-from: type=gha
+        cache-from: type=gha,scope=${{ runner.arch }}
 
     - uses: docker/build-push-action@v5
       id: retry_builder
@@ -34,7 +34,7 @@ runs:
         file: ${{ inputs.dockerfile }}
         tags: ${{ inputs.tag }}
         load: true
-        cache-from: type=gha
+        cache-from: type=gha,scope=${{ runner.arch }}
 
     - # Workaround for https://github.com/google/sanitizers/issues/1614 .
       # The underlying issue has been fixed in clang 18.1.3.
