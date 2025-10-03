@@ -113,8 +113,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -148,8 +146,6 @@ jobs:
 
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -179,8 +175,6 @@ jobs:
 
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -219,8 +213,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -258,8 +250,6 @@ jobs:
 
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -289,8 +279,6 @@ jobs:
 
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -345,8 +333,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -388,8 +374,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -438,8 +422,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -480,8 +462,6 @@ jobs:
       - name: CI script
         env: ${{ matrix.configuration.env_vars }}
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -695,8 +675,6 @@ jobs:
 
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
-        with:
-          dockerfile: ./ci/linux-debian.Dockerfile
 
       - name: Print logs
         uses: ./.github/actions/print-logs
@@ -714,7 +692,6 @@ jobs:
       - name: CI script
         uses: ./.github/actions/run-in-docker-action
         with:
-          dockerfile: ./ci/linux-debian.Dockerfile
           command: |
             g++ -Werror include/*.h
             clang -Werror -x c++-header include/*.h
