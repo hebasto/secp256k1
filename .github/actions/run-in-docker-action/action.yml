@@ -3,7 +3,8 @@ description: 'Run a command in a Docker container, while passing explicitly set 
 inputs:
   dockerfile:
     description: 'A Dockerfile that defines an image'
-    required: true
+    required: false
+    default: ./ci/linux-debian.Dockerfile
   scope:
     description: 'A cached image scope'
     required: false
