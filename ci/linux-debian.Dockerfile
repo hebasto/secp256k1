@@ -1,5 +1,7 @@
 FROM debian:stable-slim
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 SHELL ["/bin/bash", "-c"]
 
 WORKDIR /root
