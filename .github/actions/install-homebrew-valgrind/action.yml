@@ -20,7 +20,7 @@ runs:
       id: cache
       with:
         path: ${{ env.CI_HOMEBREW_CELLAR_VALGRIND }}
-        key: ${{ github.job }}-valgrind-${{ hashFiles('valgrind_fingerprint') }}
+        key: ${{ github.job }}-valgrind-${{ hashFiles('valgrind_fingerprint') }}-${{ runner.arch }}
 
     - if: steps.cache.outputs.cache-hit != 'true'
       run: |
