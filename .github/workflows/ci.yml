@@ -100,6 +100,7 @@ jobs:
     runs-on: macos-14
 
     env:
+      I_ACKNOWLEDGE_THIS_MIGHT_CRASH_OR_DAMAGE_MY_COMPUTER: 'yes'
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1
       SYMBOL_CHECK: 'no'
