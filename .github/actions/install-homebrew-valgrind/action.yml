@@ -4,8 +4,8 @@ runs:
   using: "composite"
   steps:
     - run: |
-        brew tap LouisBrunner/valgrind
-        brew fetch --HEAD LouisBrunner/valgrind/valgrind
+        brew tap hebasto/valgrind
+        brew fetch --HEAD hebasto/valgrind/valgrind
         echo "CI_HOMEBREW_CELLAR_VALGRIND=$(brew --cellar valgrind)" >> "$GITHUB_ENV"
       shell: bash
 
@@ -24,7 +24,7 @@ runs:
 
     - if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        brew install --HEAD LouisBrunner/valgrind/valgrind
+        brew install --HEAD hebasto/valgrind/valgrind
       shell: bash
 
     - if: steps.cache.outputs.cache-hit == 'true'
