@@ -181,6 +181,7 @@ if(SECP256K1_BUILD_TESTS)
         COMMAND_EXPAND_LISTS
       )
       set_tests_properties(${label}::${test_name} PROPERTIES
+        LABELS ${label}
         SKIP_REGULAR_EXPRESSION "module disabled"
       )
     endforeach()
@@ -198,7 +199,10 @@ if(SECP256K1_BUILD_EXHAUSTIVE_TESTS)
   add_executable(exhaustive_tests tests_exhaustive.c)
   target_link_libraries(exhaustive_tests secp256k1_asm)
   target_compile_definitions(exhaustive_tests PRIVATE $<$<NOT:$<CONFIG:Coverage>>:VERIFY>)
-  add_test(NAME secp256k1_exhaustive_tests COMMAND exhaustive_tests)
+  add_test(NAME secp256k1_exhaustive COMMAND exhaustive_tests)
+  set_tests_properties(secp256k1_exhaustive PROPERTIES
+    LABELS secp256k1_exhaustive
+  )
 endif()
 
 if(SECP256K1_BUILD_CTIME_TESTS)
