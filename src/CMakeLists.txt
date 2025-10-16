@@ -144,18 +144,46 @@ if(SECP256K1_BUILD_TESTS)
     list(APPEND TEST_DEFINITIONS SUPPORTS_CONCURRENCY=1)
   endif()
 
+  set(test_targets "")
+  set(test_names "")
+  # Start with the longest-running tests.
+  list(APPEND test_targets ellswift)
+  list(APPEND test_names   ellswift)
+  list(APPEND test_targets ecmult_constants)
+  list(APPEND test_names   ecmult_constants)
+  list(APPEND test_targets "ecmult_pre_g wnaf point_times_order ecmult_near_split_bound ecmult_chain ecmult_gen_blind ecmult_const_tests ecmult_multi_tests ec_combine")
+  list(APPEND test_names   ecmult)
+  # Continue with the remaining tests.
+  list(APPEND test_targets integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)
+  list(APPEND test_names   integer scalar field group ec ecdh ecdsa recovery extrakeys schnorrsig musig)
+  # Combine short, trivial tests for log brevity.
+  list(APPEND test_targets "general hash utils")
+  list(APPEND test_names   "general,hash,utils")
+
   function(add_executable_and_tests verify)
     if(verify)
       set(verify_definition VERIFY)
       set(exe_name tests)
+      set(label secp256k1_verify)
     else()
       set(verify_definition "")
       set(exe_name noverify_tests)
+      set(label secp256k1_noverify)
     endif()
     add_executable(${exe_name} tests.c)
     target_link_libraries(${exe_name} secp256k1_precomputed secp256k1_asm)
     target_compile_definitions(${exe_name} PRIVATE ${verify_definition} ${TEST_DEFINITIONS})
-    add_test(NAME secp256k1_${exe_name} COMMAND ${exe_name})
+    foreach(test_target test_name IN ZIP_LISTS test_targets test_names)
+      string(REPLACE " " ";" test_target "${test_target}")
+      list(TRANSFORM test_target PREPEND "--target=")
+      add_test(NAME ${label}::${test_name}
+        COMMAND ${exe_name} ${test_target} --log=1
+        COMMAND_EXPAND_LISTS
+      )
+      set_tests_properties(${label}::${test_name} PROPERTIES
+        SKIP_REGULAR_EXPRESSION "module disabled"
+      )
+    endforeach()
   endfunction()
 
   add_executable_and_tests(NO)
