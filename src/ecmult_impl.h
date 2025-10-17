@@ -152,27 +152,23 @@ SECP256K1_INLINE static void secp256k1_ecmult_table_get_ge_storage(secp256k1_ge 
     }
 }
 
-/** Convert a number to WNAF notation. The number becomes represented by sum(2^i * wnaf[i], i=0..bits),
- *  with the following guarantees:
- *  - each wnaf[i] is either 0, or an odd integer between -(1<<(w-1) - 1) and (1<<(w-1) - 1)
- *  - two non-zero entries in wnaf are separated by at least w-1 zeroes.
- *  - the number of set values in wnaf is returned. This number is at most 256, and at most one more
- *    than the number of bits in the (absolute value) of the input.
- */
-static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, int w) {
+typedef void (*secp256k1_ecmult_wnaf_cb)(void *wnaf_ctx, int bit, int digit);
+
+static int secp256k1_ecmult_wnaf_internal(secp256k1_ecmult_wnaf_cb emit, void *wnaf_ctx, int len, const secp256k1_scalar *a, int w) {
     secp256k1_scalar s;
     int last_set_bit = -1;
     int bit = 0;
     int sign = 1;
     int carry = 0;
 
-    VERIFY_CHECK(wnaf != NULL);
+    VERIFY_CHECK(emit != NULL);
+    VERIFY_CHECK(wnaf_ctx != NULL);
     VERIFY_CHECK(0 <= len && len <= 256);
     VERIFY_CHECK(a != NULL);
     VERIFY_CHECK(2 <= w && w <= 31);
 
     for (bit = 0; bit < len; bit++) {
-        wnaf[bit] = 0;
+        emit(wnaf_ctx, bit, 0);
     }
 
     s = *a;
@@ -200,7 +196,7 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
         carry = (word >> (w-1)) & 1;
         word -= carry << w;
 
-        wnaf[bit] = sign * word;
+        emit(wnaf_ctx, bit, sign * word);
         last_set_bit = bit;
 
         bit += now;
@@ -220,9 +216,49 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
     return last_set_bit + 1;
 }
 
+struct secp256k1_ecmult_wnaf_context {
+    int *wnaf;
+};
+
+static void secp256k1_ecmult_emit_wnaf_32bit(void *wnaf_ctx, int bit, int digit) {
+    struct secp256k1_ecmult_wnaf_context *ctx = wnaf_ctx;
+    ctx->wnaf[bit] = digit;
+}
+
+/** Convert a number to WNAF notation. The number becomes represented by sum(2^i * wnaf[i], i=0..bits),
+ *  with the following guarantees:
+ *  - each wnaf[i] is either 0, or an odd integer between -(1<<(w-1) - 1) and (1<<(w-1) - 1)
+ *  - two non-zero entries in wnaf are separated by at least w-1 zeroes.
+ *  - the number of set values in wnaf is returned. This number is at most 256, and at most one more
+ *    than the number of bits in the (absolute value) of the input.
+ */
+static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, int w) {
+    struct secp256k1_ecmult_wnaf_context ctx;
+    VERIFY_CHECK(2 <= w && w <= 31);
+    ctx.wnaf = wnaf;
+    return secp256k1_ecmult_wnaf_internal(secp256k1_ecmult_emit_wnaf_32bit, &ctx, len, a, w);
+}
+
+struct secp256k1_ecmult_wnaf_small_context {
+    int8_t *wnaf;
+};
+
+static void secp256k1_ecmult_emit_wnaf_8bit(void *wnaf_ctx, int bit, int digit) {
+    struct secp256k1_ecmult_wnaf_small_context *ctx = wnaf_ctx;
+    ctx->wnaf[bit] = (int8_t)digit;
+}
+
+/* Same as secp256k1_ecmult_wnaf, but stores to int8_t array. Requires w <= 8. */
+static int secp256k1_ecmult_wnaf_small(int8_t *wnaf, int len, const secp256k1_scalar *a, int w) {
+    struct secp256k1_ecmult_wnaf_small_context ctx;
+    VERIFY_CHECK(2 <= w && w <= 8);
+    ctx.wnaf = wnaf;
+    return secp256k1_ecmult_wnaf_internal(secp256k1_ecmult_emit_wnaf_8bit, &ctx, len, a, w);
+}
+
 struct secp256k1_strauss_point_state {
-    int wnaf_na_1[129];
-    int wnaf_na_lam[129];
+    int8_t wnaf_na_1[129];
+    int8_t wnaf_na_lam[129];
     int bits_na_1;
     int bits_na_lam;
 };
@@ -259,8 +295,8 @@ static void secp256k1_ecmult_strauss_wnaf(const struct secp256k1_strauss_state *
         secp256k1_scalar_split_lambda(&na_1, &na_lam, &na[np]);
 
         /* build wnaf representation for na_1 and na_lam. */
-        state->ps[no].bits_na_1   = secp256k1_ecmult_wnaf(state->ps[no].wnaf_na_1,   129, &na_1,   WINDOW_A);
-        state->ps[no].bits_na_lam = secp256k1_ecmult_wnaf(state->ps[no].wnaf_na_lam, 129, &na_lam, WINDOW_A);
+        state->ps[no].bits_na_1   = secp256k1_ecmult_wnaf_small(state->ps[no].wnaf_na_1,   129, &na_1,   WINDOW_A);
+        state->ps[no].bits_na_lam = secp256k1_ecmult_wnaf_small(state->ps[no].wnaf_na_lam, 129, &na_lam, WINDOW_A);
         VERIFY_CHECK(state->ps[no].bits_na_1 <= 129);
         VERIFY_CHECK(state->ps[no].bits_na_lam <= 129);
         if (state->ps[no].bits_na_1 > bits) {
