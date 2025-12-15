@@ -451,6 +451,9 @@ if test "x$enable_tests" != x"no"; then
   AC_SUBST(TEST_DEFINES)
 fi
 
+
+SECP_CHECK_CLOCK_GETTIME()
+
 ###
 ### Generate output
 ###
