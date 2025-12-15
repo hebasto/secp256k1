@@ -90,13 +90,40 @@ AC_DEFUN([SECP_SET_DEFAULT], [
   fi
 ])
 
+m4_define([SECP_CHECK_CLOCK_GETTIME_testbody], [[
+  #include <time.h>
+
+  int main() {
+    struct timespec ts;
+    return clock_gettime(CLOCK_REALTIME, &ts);
+  }
+]])
+
 AC_DEFUN([SECP_CHECK_CLOCK_GETTIME_NEEDS_RT], [
-  AC_CHECK_FUNC(clock_gettime, [], [
-    LIBS="$LIBS -lrt"
-    AC_CHECK_FUNC(clock_gettime, [], [
-      AC_MSG_ERROR([[clock_gettime() not available]])
+  AC_MSG_CHECKING([whether clock_gettime can be used without runtime library])
+  AC_LINK_IFELSE([AC_LANG_SOURCE([SECP_CHECK_CLOCK_GETTIME_testbody])], [
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+      AC_MSG_CHECKING([whether clock_gettime needs -lrt])
+      LIBS="$LIBS -lrt"
+      AC_LINK_IFELSE([AC_LANG_SOURCE([SECP_CHECK_CLOCK_GETTIME_testbody])], [
+          AC_MSG_RESULT([yes])
+        ],[
+          AC_MSG_RESULT([no])
+          AC_MSG_ERROR([clock_gettime not available])
+        ])
     ])
-  ])
+
+
+
+
+#  AC_CHECK_FUNC(clock_gettime, [], [
+#    LIBS="$LIBS -lrt"
+#    AC_CHECK_FUNC(clock_gettime, [], [
+#      AC_MSG_ERROR([[clock_gettime() not available]])
+#    ])
+#  ])
 ])
 
 AC_DEFUN([SECP_CHECK_CLOCK_GETTIME], [
