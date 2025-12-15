@@ -89,3 +89,24 @@ AC_DEFUN([SECP_SET_DEFAULT], [
     $1="$2"
   fi
 ])
+
+AC_DEFUN([SECP_CHECK_CLOCK_GETTIME], [
+  AC_MSG_CHECKING([whether POSIX clock_gettime can be used without runtime library])
+  SECP_CHECK_CLOCK_GETTIME_saved_CFLAGS="$CFLAGS"
+
+  AC_LINK_IFELSE([AC_LANG_SOURCE([_CHECK_ATOMIC_testbody])],[
+      AC_MSG_RESULT([yes])
+    ],[
+      AC_MSG_RESULT([no])
+      LIBS="$LIBS -latomic"
+      AC_MSG_CHECKING([whether std::atomic needs -latomic])
+      AC_LINK_IFELSE([AC_LANG_SOURCE([_CHECK_ATOMIC_testbody])],[
+          AC_MSG_RESULT([yes])
+        ],[
+          AC_MSG_RESULT([no])
+          AC_MSG_FAILURE([cannot figure out how to use std::atomic])
+        ])
+    ])
+
+  CFLAGS="$SECP_CHECK_CLOCK_GETTIME_saved_CFLAGS"
+])
