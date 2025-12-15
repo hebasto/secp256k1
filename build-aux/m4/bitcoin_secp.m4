@@ -91,7 +91,12 @@ AC_DEFUN([SECP_SET_DEFAULT], [
 ])
 
 AC_DEFUN([SECP_CHECK_CLOCK_GETTIME_NEEDS_RT], [
-  AC_CHECK_FUNC(clock_gettime, [], [])
+  AC_CHECK_FUNC(clock_gettime, [], [
+    LIBS="$LIBS -lrt"
+    AC_CHECK_FUNC(clock_gettime, [], [
+      AC_MSG_ERROR([[clock_gettime() not available]])
+    ])
+  ])
 ])
 
 AC_DEFUN([SECP_CHECK_CLOCK_GETTIME], [
