@@ -45,10 +45,39 @@ if(SECP256K1_ENABLE_MODULE_ECDH)
   set_property(TARGET secp256k1 APPEND PROPERTY PUBLIC_HEADER ${PROJECT_SOURCE_DIR}/include/secp256k1_ecdh.h)
 endif()
 
-add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL
-  precomputed_ecmult.c
-  precomputed_ecmult_gen.c
-)
+add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL)
+if(CMAKE_CROSSCOMPILING)
+  target_sources(secp256k1_precomputed PRIVATE
+    precomputed_ecmult.c
+    precomputed_ecmult_gen.c
+  )
+else()
+  add_executable(secp256k1_precompute_ecmult EXCLUDE_FROM_ALL precompute_ecmult.c)
+  target_compile_definitions(secp256k1_precompute_ecmult PRIVATE VERIFY)
+  set_target_properties(secp256k1_precompute_ecmult PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult.c
+    COMMAND secp256k1_precompute_ecmult
+    DEPENDS secp256k1_precompute_ecmult
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+
+  add_executable(secp256k1_precompute_ecmult_gen EXCLUDE_FROM_ALL precompute_ecmult_gen.c)
+  target_compile_definitions(secp256k1_precompute_ecmult_gen PRIVATE VERIFY)
+  set_target_properties(secp256k1_precompute_ecmult_gen PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult_gen.c
+    COMMAND secp256k1_precompute_ecmult_gen
+    DEPENDS secp256k1_precompute_ecmult_gen
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+  )
+
+  target_sources(secp256k1_precomputed PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult.c
+    ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult_gen.c
+  )
+  target_include_directories(secp256k1_precomputed PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 # Add objects explicitly rather than linking to the object libs to keep them
 # from being exported.
