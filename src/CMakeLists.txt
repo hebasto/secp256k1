@@ -47,17 +47,56 @@ endif()
 
 add_library(secp256k1_precomputed OBJECT EXCLUDE_FROM_ALL)
 if(SECP256K1_BUILD_PRECOMPUTED)
-  add_executable(secp256k1_precompute_ecmult EXCLUDE_FROM_ALL precompute_ecmult.c)
-  target_compile_definitions(secp256k1_precompute_ecmult PRIVATE VERIFY)
-  if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    # Disable warning C4334 "'operator': result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)".
-    target_compile_options(secp256k1_precompute_ecmult PRIVATE /wd4334)
+  if(CMAKE_CROSSCOMPILING)
+    include(ExternalProject)
+    ExternalProject_Add(precompute
+      PREFIX ${PROJECT_BINARY_DIR}/precompute
+      SOURCE_DIR ${PROJECT_SOURCE_DIR}
+      BINARY_DIR ${PROJECT_BINARY_DIR}/precompute
+      CMAKE_ARGS
+        -D SECP256K1_BUILD_PRECOMPUTED=ON
+        -D CMAKE_BUILD_TYPE=RelWithDebInfo
+        -D SECP256K1_INSTALL=OFF
+        -D SECP256K1_VALGRIND=OFF
+        -D SECP256K1_BUILD_BENCHMARK=OFF
+        -D SECP256K1_BUILD_TESTS=OFF
+        -D SECP256K1_BUILD_EXHAUSTIVE_TESTS=OFF
+        -D SECP256K1_ECMULT_WINDOW_SIZE=${SECP256K1_ECMULT_WINDOW_SIZE}
+        -D SECP256K1_ECMULT_GEN_KB=${SECP256K1_ECMULT_GEN_KB}
+        -D SECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY=${SECP256K1_TEST_OVERRIDE_WIDE_MULTIPLY}
+      BUILD_COMMAND cmake --build <BINARY_DIR> --config RelWithDebInfo --target secp256k1_precompute_ecmult secp256k1_precompute_ecmult_gen
+      BUILD_BYPRODUCTS
+        <BINARY_DIR>/secp256k1_precompute_ecmult${CMAKE_HOST_EXECUTABLE_SUFFIX}
+        <BINARY_DIR>/secp256k1_precompute_ecmult_gen${CMAKE_HOST_EXECUTABLE_SUFFIX}
+      INSTALL_COMMAND ""
+      LOG_CONFIGURE YES
+    )
+
+    add_executable(secp256k1_precompute_ecmult IMPORTED)
+    set_target_properties(secp256k1_precompute_ecmult PROPERTIES
+      IMPORTED_LOCATION ${PROJECT_BINARY_DIR}/precompute/secp256k1_precompute_ecmult${CMAKE_HOST_EXECUTABLE_SUFFIX}
+    )
+    add_dependencies(secp256k1_precompute_ecmult precompute)
+
+    add_executable(secp256k1_precompute_ecmult_gen IMPORTED)
+    set_target_properties(secp256k1_precompute_ecmult_gen PROPERTIES
+      IMPORTED_LOCATION ${PROJECT_BINARY_DIR}/precompute/secp256k1_precompute_ecmult_gen${CMAKE_HOST_EXECUTABLE_SUFFIX}
+    )
+    add_dependencies(secp256k1_precompute_ecmult_gen precompute)
+  else()
+    add_executable(secp256k1_precompute_ecmult EXCLUDE_FROM_ALL precompute_ecmult.c)
+    target_compile_definitions(secp256k1_precompute_ecmult PRIVATE VERIFY)
+    if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+      # Disable warning C4334 "'operator': result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)".
+      target_compile_options(secp256k1_precompute_ecmult PRIVATE /wd4334)
+    endif()
+    add_executable(secp256k1_precompute_ecmult_gen EXCLUDE_FROM_ALL precompute_ecmult_gen.c)
+    target_compile_definitions(secp256k1_precompute_ecmult_gen PRIVATE VERIFY)
+    set_target_properties(secp256k1_precompute_ecmult secp256k1_precompute_ecmult_gen PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_BINARY_DIR}
+    )
   endif()
-  add_executable(secp256k1_precompute_ecmult_gen EXCLUDE_FROM_ALL precompute_ecmult_gen.c)
-  target_compile_definitions(secp256k1_precompute_ecmult_gen PRIVATE VERIFY)
-  set_target_properties(secp256k1_precompute_ecmult secp256k1_precompute_ecmult_gen PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  )
 
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult.c ${CMAKE_CURRENT_BINARY_DIR}/precomputed_ecmult_gen.c
