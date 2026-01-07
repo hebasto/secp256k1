@@ -221,10 +221,9 @@ static int secp256k1_ecmult_wnaf(int *wnaf, int len, const secp256k1_scalar *a, 
 }
 
 /* Same as secp256k1_ecmult_wnaf, but stores to int8_t array. Requires w <= 8. */
-static int secp256k1_ecmult_wnaf_small(int8_t *wnaf, size_t len, const secp256k1_scalar *a, int w) {
+static int secp256k1_ecmult_wnaf_small(int8_t *wnaf, int len, const secp256k1_scalar *a, int w) {
     int wnaf_tmp[256];
-    int ret;
-    size_t i;
+    int ret, i;
 
     VERIFY_CHECK(2 <= w && w <= 8);
     ret = secp256k1_ecmult_wnaf(wnaf_tmp, len, a, w);
