@@ -50,6 +50,10 @@ runs:
           --workdir "$GITHUB_WORKSPACE" \
           $(docker images -q | head -n1) \
           bash -c "
+            set -x
+            echo '+++++++++++++++++++++++++++++++++++++++++++++++++++++'
             git config --global --add safe.directory '$GITHUB_WORKSPACE'
+            echo '+++++++++++++++++++++++++++++++++++++++++++++++++++++'
             $CMD_TO_RUN
+            echo '+++++++++++++++++++++++++++++++++++++++++++++++++++++'
           "
