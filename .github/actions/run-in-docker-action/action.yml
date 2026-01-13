@@ -45,7 +45,7 @@ runs:
         CMD_TO_RUN: ${{ inputs.command }}
       run: |
         docker run \
-          $(echo '${{ toJSON(env) }}' | jq -r 'keys[] | "--env \(.) "') \
+          $(echo '${{ toJSON(env) }}' | jq -r 'keys[] | select(. != "CMD_TO_RUN") | "--env \(.) "') \
           --volume "$GITHUB_WORKSPACE":"$GITHUB_WORKSPACE" \
           --workdir "$GITHUB_WORKSPACE" \
           $(docker images -q | head -n1) \
