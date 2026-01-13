@@ -98,4 +98,4 @@ jobs:
         with:
           dockerfile: ./ci/linux-debian.Dockerfile
           # A "malicious" command PoC.
-          command: "'; id; echo '"
+          command: "'; echo \"INJECTION SUCCESSFUL: $(id)\" >&2; echo '"
