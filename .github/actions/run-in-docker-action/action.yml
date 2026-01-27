@@ -7,7 +7,7 @@ inputs:
   scope:
     description: 'A cached image scope'
     required: false
-    default: ${{ runner.arch }}
+    default: ${{ runner.arch }}-${{ needs.cache_timestamp.outputs.period }}
   command:
     description: 'A command to run in a container'
     required: true

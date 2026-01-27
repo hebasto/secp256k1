@@ -45,9 +45,19 @@ env:
   EXAMPLES: 'yes'
 
 jobs:
+  cache_timestamp:
+    name: "Prepare cache rotation"
+    runs-on: ubuntu-slim
+    outputs:
+      period: ${{ steps.cache_timestamp.outputs.period }}
+    steps:
+      - id: cache_timestamp
+        run: echo "period=$((10#$(date +%V) / 2))" >> $GITHUB_OUTPUT
+
   docker_cache:
     name: "Build ${{ matrix.arch }} Docker image"
     runs-on: ${{ matrix.runner }}
+    needs: cache_timestamp
 
     strategy:
       fail-fast: false
@@ -70,8 +80,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           file: ./ci/linux-debian.Dockerfile
-          cache-from: type=gha,scope=${{ runner.arch }}
-          cache-to: type=gha,scope=${{ runner.arch }},mode=min
+          cache-from: type=gha,scope=${{ runner.arch }}-${{ needs.cache_timestamp.outputs.period }}
+          cache-to: type=gha,scope=${{ runner.arch }}-${{ needs.cache_timestamp.outputs.period }},mode=min
 
   x86_64-debian:
     name: "x86_64: Linux (Debian stable)"
