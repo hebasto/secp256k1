@@ -52,7 +52,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-instal
     [ $(ls *.tar.xz | wc -l) -eq "1" ] && \
     tar xf *.tar.xz && \
     mkdir gcc-build && cd gcc-build && \
-    ../*/configure --prefix=/opt/gcc-snapshot --enable-languages=c --disable-bootstrap --disable-multilib --without-isl && \
+    ../*/configure --prefix=/opt/gcc-snapshot --enable-languages=c --disable-bootstrap --disable-multilib --disable-libvtv --without-isl && \
     make -j $(nproc) && \
     make install && \
     cd ../.. && rm -rf gcc && \
