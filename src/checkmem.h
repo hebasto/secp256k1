@@ -79,7 +79,18 @@
 #    pragma clang diagnostic push
 #    pragma clang diagnostic ignored "-Wreserved-identifier"
 #  endif
+#  if defined(__GNUC__) && defined(__has_warning)
+#    if __has_warning("-Wtrailing-whitespace")
+#      pragma GCC diagnostic push
+#      pragma GCC diagnostic ignored "-Wtrailing-whitespace"
+#    endif
+#  endif
 #    include <valgrind/memcheck.h>
+#  if defined(__GNUC__) && defined(__has_warning)
+#    if __has_warning("-Wtrailing-whitespace")
+#      pragma GCC diagnostic pop
+#    endif
+#  endif
 #  if defined(__clang__) && defined(__APPLE__)
 #    pragma clang diagnostic pop
 #  endif
