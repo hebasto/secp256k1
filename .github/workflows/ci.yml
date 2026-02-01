@@ -6,6 +6,11 @@ on:
       - '**'
     tags-ignore:
       - '**'
+  schedule:
+    # Run on the default branch every Monday morning,
+    # shortly after a new GCC snapshot has been uploaded.
+    # This also populates new Docker caches.
+    - cron: '22 2 * * 1'
 
 concurrency:
   group: ${{ github.event_name != 'pull_request' && github.run_id || github.ref }}
