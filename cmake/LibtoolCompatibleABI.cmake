@@ -12,6 +12,14 @@ function(secp256k1_set_libtool_abi_version target current revision age)
       SOVERSION ${_major}
       VERSION ${_major}.${age}.${revision}
     )
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
+    # version_type = sunos
+    # major = $current
+    # versuffix = $current.$revision
+    set_target_properties(${target} PROPERTIES
+      SOVERSION ${current}
+      VERSION ${current}.${revision}
+    )
   elseif(APPLE)
     math(EXPR _compatibility "${current} + 1")
     set_target_properties(${target} PROPERTIES
