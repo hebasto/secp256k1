@@ -1,0 +1,111 @@
+name: ABI Version Check
+on: [push]
+
+jobs:
+  openbsd:
+    name: 'OpenBSD, ${{ matrix.name }}'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: openbsd {0}
+    strategy: &MATRIX
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'Autotools @ master'
+            buildsystem: 'Autotools'
+            ref: 'heads/master'
+          - name: 'CMake @ master'
+            buildsystem: 'CMake'
+            ref: 'heads/master'
+          - name: 'CMake @ PR1860'
+            buildsystem: 'CMake'
+            ref: 'pull/1860/head'
+
+    steps:
+      - name: Start OpenBSD VM
+        uses: vmactions/openbsd-vm@v1
+        with:
+          sync: no
+
+      - name: Fetch source tarball
+        run: |
+          set -e
+          pkg_add curl gtar--
+          curl --location --fail --output source.tar.gz https://github.com/bitcoin-core/secp256k1/archive/refs/${{ matrix.ref }}.tar.gz
+          mkdir /home/secp256k1
+          gtar -xf source.tar.gz -C /home/secp256k1 --strip-components=1
+          rm -rf source.tar.gz
+
+      - name: Build with Autotools
+        if: matrix.buildsystem == 'Autotools'
+        run: |
+          set -e
+          pkg_add autoconf%2.72 automake%1.18 libtool gmake
+          export AUTOCONF_VERSION=2.72
+          export AUTOMAKE_VERSION=1.18
+          cd /home/secp256k1
+          ./autogen.sh
+          ./configure --prefix=/home/INSTALL --disable-static
+          gmake -j 4
+          gmake install
+
+      - name: Build with CMake
+        if: matrix.buildsystem == 'CMake'
+        run: |
+          set -e
+          pkg_add cmake
+          cmake -S /home/secp256k1 -B /home/build -DCMAKE_INSTALL_PREFIX=/home/INSTALL -DBUILD_SHARED_LIBS=ON
+          cd /home/build
+          cmake --build . -j 4
+          cmake --install .
+
+      - name: Result <-- CHECK THIS OUT
+        run: ls -l /home/INSTALL/lib
+
+  netbsd:
+    name: 'NetBSD, ${{ matrix.name }}'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: netbsd {0}
+    strategy: *MATRIX
+
+    steps:
+      - name: Start NetBSD VM
+        uses: vmactions/netbsd-vm@v1
+        with:
+          sync: no
+
+      - name: Fetch source tarball
+        run: |
+          set -e
+          pkg_add curl
+          curl --location --fail --output source.tar.gz https://github.com/bitcoin-core/secp256k1/archive/refs/${{ matrix.ref }}.tar.gz
+          mkdir secp256k1
+          tar -xf source.tar.gz -C secp256k1 --strip-components=1
+          rm -rf source.tar.gz
+
+      - name: Build with Autotools
+        if: matrix.buildsystem == 'Autotools'
+        run: |
+          set -e
+          pkg_add autoconf automake libtool gmake
+          cd secp256k1
+          ./autogen.sh
+          ./configure --prefix="$(pwd)/../INSTALL" --disable-static
+          gmake -j 4
+          gmake install
+
+      - name: Build with CMake
+        if: matrix.buildsystem == 'CMake'
+        run: |
+          set -e
+          pkg_add cmake
+          cmake -S secp256k1 -B build -DCMAKE_INSTALL_PREFIX="$(pwd)/INSTALL" -DBUILD_SHARED_LIBS=ON
+          cd build
+          cmake --build . -j 4
+          cmake --install .
+
+      - name: Result <-- CHECK THIS OUT
+        run: ls -l INSTALL/lib
