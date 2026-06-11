@@ -56,6 +56,10 @@ jobs:
     name: ${{ matrix.configuration.job_name }}
     # See: https://github.com/actions/runner-images#available-images.
     runs-on: windows-2022
+    defaults:
+      run:
+        # Ensure early-return PowerShell behaviour.
+        shell: pwsh -Command "$PSNativeCommandUseErrorActionPreference = $true; & '{0}'"
 
     strategy:
       fail-fast: false
@@ -123,5 +127,8 @@ jobs:
 
       - name: Check precomputed files
         run: |
+          Write-Output "The default ErrorActionPreference is: $ErrorActionPreference"
           cmake -E copy build/src/precomputed_ecmult.c build/src/precomputed_ecmult-gen.c -t src
+          Write-Output "The default ErrorActionPreference is: $ErrorActionPreference"
           git diff --exit-code
+          Write-Output "The default ErrorActionPreference is: $ErrorActionPreference"
