@@ -134,6 +134,7 @@ jobs:
       SCHNORRSIG: 'yes'
       MUSIG: 'yes'
       ELLSWIFT: 'yes'
+      CTIMETESTS: 'no'
       SYMBOL_CHECK: 'no'
       CC: gcc-4.4
       CFLAGS: '-Wno-error=missing-braces -Wno-error=missing-field-initializers -Wno-error=shadow'
