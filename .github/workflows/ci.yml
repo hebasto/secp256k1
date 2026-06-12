@@ -286,6 +286,31 @@ jobs:
       - *CI_SCRIPT_IN_DOCKER
       - *PRINT_LOGS
 
+  x86_64_debian_wheezy:
+    name: "x86_64: Linux (Debian Wheezy)"
+    runs-on: ubuntu-latest
+
+    env:
+      ECDH: 'yes'
+      RECOVERY: 'yes'
+      EXTRAKEYS: 'yes'
+      SCHNORRSIG: 'yes'
+      MUSIG: 'yes'
+      ELLSWIFT: 'yes'
+      CC: gcc-4.4
+
+    steps:
+      - *CHECKOUT
+
+      - name: CI script
+        uses: ./.github/actions/run-in-docker-action
+        with:
+          dockerfile: ./ci/linux-debian7.Dockerfile
+          scope: ${{ runner.arch }}
+          command: ./ci/ci.sh
+
+      - *PRINT_LOGS
+
   valgrind_debian:
     name: "Valgrind ${{ matrix.configuration.binary_arch }} (memcheck)"
     runs-on: ${{ matrix.configuration.runner }}
