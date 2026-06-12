@@ -126,6 +126,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      ASM: 'auto'
+      WITH_VALGRIND: 'no'
       ECDH: 'yes'
       RECOVERY: 'yes'
       EXTRAKEYS: 'yes'
