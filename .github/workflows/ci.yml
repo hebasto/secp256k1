@@ -134,7 +134,9 @@ jobs:
       SCHNORRSIG: 'yes'
       MUSIG: 'yes'
       ELLSWIFT: 'yes'
+      SYMBOL_CHECK: 'no'
       CC: gcc-4.4
+      CFLAGS: '-Wno-error=shadow'
 
     steps:
       - *CHECKOUT
