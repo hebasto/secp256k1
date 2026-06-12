@@ -136,6 +136,9 @@ jobs:
       ELLSWIFT: 'yes'
       CTIMETESTS: 'no'
       SYMBOL_CHECK: 'no'
+      # On Linux, the examples include <sys/random.h>, which was
+      # added in glibc 2.25, while Debian 7 ships glibc 2.13.
+      EXAMPLES: 'no'
       CC: gcc-4.4
       CFLAGS: '-Wno-error=missing-braces -Wno-error=missing-field-initializers -Wno-error=shadow'
 
