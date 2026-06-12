@@ -136,6 +136,9 @@ jobs:
       ELLSWIFT: 'yes'
       CTIMETESTS: 'no'
       SYMBOL_CHECK: 'no'
+      # Examples rely on `getrandom(2)`, which has been available
+      # since glibc 2.25, while Debian Wheezy ships glibc 2.13.
+      EXAMPLES: 'no'
       CC: gcc-4.4
       CFLAGS: '-Wno-error=missing-braces -Wno-error=missing-field-initializers -Wno-error=shadow'
 
