@@ -5,7 +5,7 @@ set -eux
 export LC_ALL=C
 
 # Print commit and relevant CI environment to allow reproducing the job outside of CI.
-git show -s
+git show --no-patch
 print_environment() {
     # Turn off -x because it messes up the output
     set +x
