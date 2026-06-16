@@ -138,7 +138,8 @@ jobs:
       # On Linux, the examples include <sys/random.h>, which was
       # added in glibc 2.25, while Debian 7 ships glibc 2.13.
       EXAMPLES: 'no'
-      CFLAGS: '-Wno-error=missing-braces -Wno-error=missing-field-initializers -Wno-error=shadow'
+      CC: 'gcc'
+      CFLAGS: '-Wno-error=missing-braces -Wno-error=missing-field-initializers -Wno-error=shadow -Wno-error=unused-function'
 
     steps:
       - *CHECKOUT
