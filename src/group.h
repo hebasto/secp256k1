@@ -205,6 +205,14 @@ static void secp256k1_ge_serialize33(secp256k1_ge *elem, unsigned char *pub33);
 /** Serialize a group element (that is not allowed to be infinity) to an uncompressed public key (65 bytes). */
 static void secp256k1_ge_serialize65(secp256k1_ge *elem, unsigned char *pub65);
 
+/** Outputs 33 zero bytes if the given group element is the point at infinity and
+ *  otherwise outputs the compressed serialization */
+static void secp256k1_ge_serialize_ext33(unsigned char *out33, secp256k1_ge *ge);
+
+/** Outputs the point at infinity if the given byte array is all zero, otherwise
+ *  attempts to parse compressed point serialization. */
+static int secp256k1_ge_parse_ext33(secp256k1_ge *ge, const unsigned char *in33);
+
 /** Determine if a point (which is assumed to be on the curve) is in the correct (sub)group of the curve.
  *
  * In normal mode, the used group is secp256k1, which has cofactor=1 meaning that every point on the curve is in the

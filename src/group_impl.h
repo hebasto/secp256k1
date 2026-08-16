@@ -1050,4 +1050,26 @@ static void secp256k1_ge_serialize65(secp256k1_ge *elem, unsigned char *pub65) {
     secp256k1_fe_get_b32(&pub65[33], &elem->y);
 }
 
+static void secp256k1_ge_serialize_ext33(unsigned char *out33, secp256k1_ge *ge) {
+    if (secp256k1_ge_is_infinity(ge)) {
+        memset(out33, 0, 33);
+    } else {
+        /* Serialize must succeed because the point is not at infinity */
+        secp256k1_ge_serialize33(ge, out33);
+    }
+}
+
+static int secp256k1_ge_parse_ext33(secp256k1_ge *ge, const unsigned char *in33) {
+    unsigned char zeros[33] = { 0 };
+
+    if (secp256k1_memcmp_var(in33, zeros, sizeof(zeros)) == 0) {
+        secp256k1_ge_set_infinity(ge);
+        return 1;
+    }
+    if (!secp256k1_ge_parse(ge, in33, 33)) {
+        return 0;
+    }
+    return secp256k1_ge_is_in_correct_subgroup(ge);
+}
+
 #endif /* SECP256K1_GROUP_IMPL_H */
