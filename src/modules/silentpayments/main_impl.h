@@ -71,7 +71,7 @@ static int secp256k1_silentpayments_calculate_input_hash_scalar(const secp256k1_
 
     secp256k1_silentpayments_sha256_init_inputs(&hash);
     secp256k1_sha256_write(hash_ctx, &hash, outpoint_smallest36, 36);
-    secp256k1_eckey_pubkey_serialize33(pubkey_sum, pubkey_sum_ser);
+    secp256k1_ge_serialize33(pubkey_sum, pubkey_sum_ser);
     secp256k1_sha256_write(hash_ctx, &hash, pubkey_sum_ser, sizeof(pubkey_sum_ser));
     secp256k1_sha256_finalize(hash_ctx, &hash, input_hash);
     /* Convert input_hash to a scalar.
@@ -367,7 +367,7 @@ int secp256k1_silentpayments_recipient_label_parse(const secp256k1_context* ctx,
     memset(label, 0, sizeof(*label));
     ARG_CHECK(in33 != NULL);
 
-    if (!secp256k1_eckey_pubkey_parse(&ge, in33, 33)) {
+    if (!secp256k1_ge_parse(&ge, in33, 33)) {
         return 0;
     }
 
@@ -386,7 +386,7 @@ int secp256k1_silentpayments_recipient_label_serialize(const secp256k1_context* 
     if (!secp256k1_silentpayments_label_load(ctx, &ge, label)) {
         return 0;
     }
-    secp256k1_eckey_pubkey_serialize33(&ge, out33);
+    secp256k1_ge_serialize33(&ge, out33);
     return 1;
 }
 
@@ -593,7 +593,7 @@ static int secp256k1_silentpayments_check_label_batch(
          * we know that label_candidate = tx_output - unlabeled_output cannot be the point at infinity.
          */
         VERIFY_CHECK(!secp256k1_ge_is_infinity(&label_candidates_ge[i]));
-        secp256k1_eckey_pubkey_serialize33(&label_candidates_ge[i], label33);
+        secp256k1_ge_serialize33(&label_candidates_ge[i], label33);
         *label_tweak = label_lookup(label33, label_context);
         if (*label_tweak != NULL) {
             *label_ge = label_candidates_ge[i];

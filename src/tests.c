@@ -5747,7 +5747,7 @@ static void test_ecmult_accumulate(secp256k1_sha256* acc, const secp256k1_scalar
         secp256k1_sha256_write(secp256k1_get_hash_context(CTX), acc, zerobyte, 1);
     } else {
         /* Store other points using their uncompressed serialization. */
-        secp256k1_eckey_pubkey_serialize65(&r, bytes);
+        secp256k1_ge_serialize65(&r, bytes);
         secp256k1_sha256_write(secp256k1_get_hash_context(CTX), acc, bytes, sizeof(bytes));
     }
 }
@@ -6853,7 +6853,7 @@ static void test_random_pubkeys(void) {
     if (len > 33) {
         testrand256(&in[33]);
     }
-    if (secp256k1_eckey_pubkey_parse(&elem, in, len)) {
+    if (secp256k1_ge_parse(&elem, in, len)) {
         unsigned char out[65];
         unsigned char firstb;
         int res;
@@ -6861,9 +6861,9 @@ static void test_random_pubkeys(void) {
         firstb = in[0];
         /* If the pubkey can be parsed, it should round-trip... */
         if (len == 33) {
-            secp256k1_eckey_pubkey_serialize33(&elem, out);
+            secp256k1_ge_serialize33(&elem, out);
         } else {
-            secp256k1_eckey_pubkey_serialize65(&elem, out);
+            secp256k1_ge_serialize65(&elem, out);
         }
         CHECK(secp256k1_memcmp_var(&in[1], &out[1], len-1) == 0);
         /* ... except for the type of hybrid inputs. */
@@ -6871,12 +6871,12 @@ static void test_random_pubkeys(void) {
             CHECK(in[0] == out[0]);
         }
         size = 65;
-        secp256k1_eckey_pubkey_serialize65(&elem, in);
-        CHECK(secp256k1_eckey_pubkey_parse(&elem2, in, size));
+        secp256k1_ge_serialize65(&elem, in);
+        CHECK(secp256k1_ge_parse(&elem2, in, size));
         CHECK(secp256k1_ge_eq_var(&elem2, &elem));
         /* Check that the X9.62 hybrid type is checked. */
         in[0] = testrand_bits(1) ? 6 : 7;
-        res = secp256k1_eckey_pubkey_parse(&elem2, in, size);
+        res = secp256k1_ge_parse(&elem2, in, size);
         if (firstb == 2 || firstb == 3) {
             if (in[0] == firstb + 4) {
               CHECK(res);
@@ -6886,7 +6886,7 @@ static void test_random_pubkeys(void) {
         }
         if (res) {
             CHECK(secp256k1_ge_eq_var(&elem, &elem2));
-            secp256k1_eckey_pubkey_serialize65(&elem, out);
+            secp256k1_ge_serialize65(&elem, out);
             CHECK(secp256k1_memcmp_var(&in[1], &out[1], 64) == 0);
         }
     }
@@ -7416,7 +7416,7 @@ static void run_ecdsa_edge_cases(void) {
         secp256k1_scalar_set_int(&ss, 1);
         secp256k1_scalar_set_int(&msg, 0);
         secp256k1_scalar_set_int(&sr, 0);
-        CHECK(secp256k1_eckey_pubkey_parse(&key, pubkey_mods_zero, 33));
+        CHECK(secp256k1_ge_parse(&key, pubkey_mods_zero, 33));
         CHECK(secp256k1_ecdsa_sig_verify( &sr, &ss, &key, &msg) == 0);
     }
 
@@ -7435,7 +7435,7 @@ static void run_ecdsa_edge_cases(void) {
         secp256k1_scalar_set_int(&ss, 0);
         secp256k1_scalar_set_int(&msg, 0);
         secp256k1_scalar_set_int(&sr, 1);
-        CHECK(secp256k1_eckey_pubkey_parse(&key, pubkey, 33));
+        CHECK(secp256k1_ge_parse(&key, pubkey, 33));
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key, &msg) == 0);
     }
 
@@ -7462,8 +7462,8 @@ static void run_ecdsa_edge_cases(void) {
         secp256k1_scalar_set_int(&ss, 2);
         secp256k1_scalar_set_int(&msg, 0);
         secp256k1_scalar_set_int(&sr, 2);
-        CHECK(secp256k1_eckey_pubkey_parse(&key, pubkey, 33));
-        CHECK(secp256k1_eckey_pubkey_parse(&key2, pubkey2, 33));
+        CHECK(secp256k1_ge_parse(&key, pubkey, 33));
+        CHECK(secp256k1_ge_parse(&key2, pubkey2, 33));
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key, &msg) == 1);
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key2, &msg) == 1);
         secp256k1_scalar_negate(&ss, &ss);
@@ -7503,8 +7503,8 @@ static void run_ecdsa_edge_cases(void) {
         secp256k1_scalar_set_int(&ss, 1);
         secp256k1_scalar_set_int(&msg, 1);
         secp256k1_scalar_set_b32(&sr, csr, NULL);
-        CHECK(secp256k1_eckey_pubkey_parse(&key, pubkey, 33));
-        CHECK(secp256k1_eckey_pubkey_parse(&key2, pubkey2, 33));
+        CHECK(secp256k1_ge_parse(&key, pubkey, 33));
+        CHECK(secp256k1_ge_parse(&key2, pubkey2, 33));
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key, &msg) == 1);
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key2, &msg) == 1);
         secp256k1_scalar_negate(&ss, &ss);
@@ -7538,7 +7538,7 @@ static void run_ecdsa_edge_cases(void) {
         secp256k1_scalar_set_int(&msg, 1);
         secp256k1_scalar_negate(&msg, &msg);
         secp256k1_scalar_set_b32(&sr, csr, NULL);
-        CHECK(secp256k1_eckey_pubkey_parse(&key, pubkey, 33));
+        CHECK(secp256k1_ge_parse(&key, pubkey, 33));
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key, &msg) == 1);
         secp256k1_scalar_negate(&ss, &ss);
         CHECK(secp256k1_ecdsa_sig_verify(&sr, &ss, &key, &msg) == 1);

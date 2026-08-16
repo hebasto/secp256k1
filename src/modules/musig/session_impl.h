@@ -26,7 +26,7 @@ static void secp256k1_musig_ge_serialize_ext(unsigned char *out33, secp256k1_ge*
         memset(out33, 0, 33);
     } else {
         /* Serialize must succeed because the point is not at infinity */
-        secp256k1_eckey_pubkey_serialize33(ge, out33);
+        secp256k1_ge_serialize33(ge, out33);
     }
 }
 
@@ -39,7 +39,7 @@ static int secp256k1_musig_ge_parse_ext(secp256k1_ge* ge, const unsigned char *i
         secp256k1_ge_set_infinity(ge);
         return 1;
     }
-    if (!secp256k1_eckey_pubkey_parse(ge, in33, 33)) {
+    if (!secp256k1_ge_parse(ge, in33, 33)) {
         return 0;
     }
     return secp256k1_ge_is_in_correct_subgroup(ge);
@@ -194,7 +194,7 @@ int secp256k1_musig_pubnonce_parse(const secp256k1_context* ctx, secp256k1_musig
     ARG_CHECK(in66 != NULL);
 
     for (i = 0; i < 2; i++) {
-        if (!secp256k1_eckey_pubkey_parse(&ges[i], &in66[33*i], 33)) {
+        if (!secp256k1_ge_parse(&ges[i], &in66[33*i], 33)) {
             return 0;
         }
         if (!secp256k1_ge_is_in_correct_subgroup(&ges[i])) {
@@ -219,7 +219,7 @@ int secp256k1_musig_pubnonce_serialize(const secp256k1_context* ctx, unsigned ch
     }
     for (i = 0; i < 2; i++) {
         /* serialize must succeed because the point was just loaded */
-        secp256k1_eckey_pubkey_serialize33(&ges[i], &out66[33*i]);
+        secp256k1_ge_serialize33(&ges[i], &out66[33*i]);
     }
     return 1;
 }
@@ -405,7 +405,7 @@ static int secp256k1_musig_nonce_gen_internal(const secp256k1_context* ctx, secp
         return 0;
     }
     /* A pubkey cannot be the point at infinity */
-    secp256k1_eckey_pubkey_serialize33(&pk, pk_ser);
+    secp256k1_ge_serialize33(&pk, pk_ser);
 
     secp256k1_nonce_function_musig(secp256k1_get_hash_context(ctx), k, input_nonce, msg32, seckey, pk_ser, aggpk_ser_ptr, extra_input32);
     VERIFY_CHECK(!secp256k1_scalar_is_zero(&k[0]));
