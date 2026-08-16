@@ -535,7 +535,7 @@ const secp256k1_ellswift_xdh_hash_function secp256k1_ellswift_xdh_hash_function_
 
 int secp256k1_ellswift_xdh(const secp256k1_context *ctx, unsigned char *output, const unsigned char *ell_a64, const unsigned char *ell_b64, const unsigned char *seckey32, int party, secp256k1_ellswift_xdh_hash_function hashfp, void *data) {
     int ret = 0;
-    int overflow;
+    int is_sec_valid;
     secp256k1_scalar s;
     secp256k1_fe xn, xd, px, u, t;
     unsigned char sx[32];
@@ -555,9 +555,8 @@ int secp256k1_ellswift_xdh(const secp256k1_context *ctx, unsigned char *output, 
     secp256k1_ellswift_xswiftec_frac_var(&xn, &xd, &u, &t);
 
     /* Load private key (using one if invalid). */
-    secp256k1_scalar_set_b32(&s, seckey32, &overflow);
-    overflow |= secp256k1_scalar_is_zero(&s);
-    secp256k1_scalar_cmov(&s, &secp256k1_scalar_one, overflow);
+    is_sec_valid = secp256k1_scalar_set_b32_seckey(&s, seckey32);
+    secp256k1_scalar_cmov(&s, &secp256k1_scalar_one, !is_sec_valid);
 
     /* Compute shared X coordinate. */
     secp256k1_ecmult_const_xonly(&px, &xn, &xd, &s, 1);
@@ -577,7 +576,7 @@ int secp256k1_ellswift_xdh(const secp256k1_context *ctx, unsigned char *output, 
     secp256k1_fe_clear(&px);
     secp256k1_scalar_clear(&s);
 
-    return !!ret & !overflow;
+    return (!!ret) & is_sec_valid;
 }
 
 #endif
