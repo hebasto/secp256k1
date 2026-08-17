@@ -15,7 +15,7 @@
 #include "group.h"
 #include "ecmult_gen.h"
 
-static int secp256k1_eckey_privkey_tweak_add(secp256k1_scalar *key, const secp256k1_scalar *tweak) {
+static int secp256k1_eckey_seckey_tweak_add(secp256k1_scalar *key, const secp256k1_scalar *tweak) {
     secp256k1_scalar_add(key, key, tweak);
     return !secp256k1_scalar_is_zero(key);
 }
@@ -32,7 +32,7 @@ static int secp256k1_eckey_pubkey_tweak_add(secp256k1_ge *key, const secp256k1_s
     return 1;
 }
 
-static int secp256k1_eckey_privkey_tweak_mul(secp256k1_scalar *key, const secp256k1_scalar *tweak) {
+static int secp256k1_eckey_seckey_tweak_mul(secp256k1_scalar *key, const secp256k1_scalar *tweak) {
     int ret;
     ret = !secp256k1_scalar_is_zero(tweak);
 

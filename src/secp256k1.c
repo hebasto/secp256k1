@@ -688,7 +688,7 @@ static int secp256k1_ec_seckey_tweak_add_helper(secp256k1_scalar *sec, const uns
     int ret = 0;
 
     secp256k1_scalar_set_b32(&term, tweak32, &overflow);
-    ret = (!overflow) & secp256k1_eckey_privkey_tweak_add(sec, &term);
+    ret = (!overflow) & secp256k1_eckey_seckey_tweak_add(sec, &term);
     secp256k1_scalar_clear(&term);
     return ret;
 }
@@ -744,7 +744,7 @@ int secp256k1_ec_seckey_tweak_mul(const secp256k1_context* ctx, unsigned char *s
 
     secp256k1_scalar_set_b32(&factor, tweak32, &overflow);
     ret = secp256k1_scalar_set_b32_seckey(&sec, seckey);
-    ret &= (!overflow) & secp256k1_eckey_privkey_tweak_mul(&sec, &factor);
+    ret &= (!overflow) & secp256k1_eckey_seckey_tweak_mul(&sec, &factor);
     secp256k1_scalar_cmov(&sec, &secp256k1_scalar_zero, !ret);
     secp256k1_scalar_get_b32(seckey, &sec);
 
