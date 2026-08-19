@@ -116,7 +116,7 @@ static void secp256k1_musig_keyaggcoef_internal(const secp256k1_hash_ctx *hash_c
         secp256k1_sha256_write(hash_ctx, &sha, pks_hash, 32);
         /* Serialization does not fail since the pk is not the point at infinity
          * (according to this function's precondition). */
-        secp256k1_eckey_pubkey_serialize33(pk, buf);
+        secp256k1_ge_serialize33(pk, buf);
         secp256k1_sha256_write(hash_ctx, &sha, buf, sizeof(buf));
         secp256k1_sha256_finalize(hash_ctx, &sha, buf);
         secp256k1_scalar_set_b32(r, buf, NULL);

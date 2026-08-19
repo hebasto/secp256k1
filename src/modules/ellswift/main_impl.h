@@ -405,7 +405,7 @@ int secp256k1_ellswift_encode(const secp256k1_context *ctx, unsigned char *ell64
         /* Set up hasher state; the used RNG is H(pubkey || "\x00"*31 || rnd32 || cnt++), using
          * BIP340 tagged hash with tag "secp256k1_ellswift_encode". */
         secp256k1_ellswift_sha256_init_encode(&hash);
-        secp256k1_eckey_pubkey_serialize33(&p, p64);
+        secp256k1_ge_serialize33(&p, p64);
         secp256k1_sha256_write(secp256k1_get_hash_context(ctx), &hash, p64, sizeof(p64));
         secp256k1_sha256_write(secp256k1_get_hash_context(ctx), &hash, rnd32, 32);
 
