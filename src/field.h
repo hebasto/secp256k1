@@ -217,7 +217,7 @@ static void secp256k1_fe_get_b32(unsigned char *r, const secp256k1_fe *a);
  */
 #define secp256k1_fe_negate(r, a, m) ASSERT_INT_CONST_AND_DO(m, secp256k1_fe_negate_unchecked(r, a, m))
 
-/** Like secp256k1_fe_negate_unchecked but m is not checked to be an integer constant expression.
+/** Like secp256k1_fe_negate but m is not checked to be an integer constant expression.
  *
  * Should not be called directly outside of tests.
  */
