@@ -3324,7 +3324,7 @@ static void run_field_misc(void) {
         testutil_random_fe_non_zero(&y);
         v = testrand_bits(15);
         /* Test that fe_add_int is equivalent to fe_set_int + fe_add. */
-        secp256k1_fe_set_int(&q, v); /* q = v */
+        secp256k1_fe_set_int_unchecked(&q, v); /* q = v */
         z = x; /* z = x */
         secp256k1_fe_add(&z, &q); /* z = x+v */
         q = x; /* q = x */
@@ -3531,7 +3531,7 @@ static void run_sqrt(void) {
 
     /* Check sqrt of small squares (and their negatives) */
     for (i = 1; i <= 100; i++) {
-        secp256k1_fe_set_int(&x, i);
+        secp256k1_fe_set_int_unchecked(&x, i);
         secp256k1_fe_sqr(&s, &x);
         test_sqrt(&s, &x);
         secp256k1_fe_negate(&t, &s, 1);
