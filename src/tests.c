@@ -7388,6 +7388,122 @@ static void run_ecdsa_der_parse(void) {
     }
 }
 
+/* Appends the body of a signature holding a 122-byte R integer, which exceeds
+ * 32 bytes and therefore overflows to zero, and the 2-byte S integer 0x0123.
+ * The body is exactly 128 bytes long, the smallest length whose encoding
+ * requires the long form. */
+static size_t der_long_form_body(unsigned char *buf) {
+    size_t len = 0;
+    size_t i;
+    buf[len++] = 0x02;
+    buf[len++] = 0x7A;
+    for (i = 0; i < 0x7A; i++) {
+        buf[len++] = 0x01;
+    }
+    buf[len++] = 0x02;
+    buf[len++] = 0x02;
+    buf[len++] = 0x01;
+    buf[len++] = 0x23;
+    CHECK(len == 128);
+    return len;
+}
+
+/* Appends the 35-byte encoding of an INTEGER holding a zero pad followed by 32
+ * bytes whose top bit is set. */
+static size_t der_padded_integer(unsigned char *buf) {
+    size_t len = 0;
+    size_t i;
+    buf[len++] = 0x02;
+    buf[len++] = 0x21;
+    buf[len++] = 0x00;
+    buf[len++] = 0x80;
+    for (i = 0; i < 31; i++) {
+        buf[len++] = 0x01;
+    }
+    CHECK(len == 35);
+    return len;
+}
+
+/* Checks that sig holds the values encoded by der_long_form_body. */
+static void der_long_form_check(const secp256k1_ecdsa_signature *sig) {
+    static const unsigned char zeroes[62] = {0};
+    unsigned char compact[64];
+    CHECK(secp256k1_ecdsa_signature_serialize_compact(CTX, compact, sig) == 1);
+    CHECK(secp256k1_memcmp_var(compact, zeroes, 62) == 0);
+    CHECK(compact[62] == 0x01);
+    CHECK(compact[63] == 0x23);
+}
+
+/* Tests the long form length encoding (X.690-0207 8.1.3.5).
+ *
+ * random_ber_signature only emits long form lengths in signatures it marks as
+ * certainly_not_der, so run_ecdsa_der_parse never asserts that a long form
+ * length is accepted. Note that the long form is only valid in DER for lengths
+ * of at least 128, which is more than a signature with two in-range scalars
+ * needs, so the R integers below are longer than 32 bytes. Such integers are
+ * not rejected: secp256k1_der_parse_integer flags them as overflowing and, as
+ * for any overflow, sets the scalar to zero. */
+static void run_ecdsa_der_parse_long_form(void) {
+    unsigned char buf[256];
+    secp256k1_ecdsa_signature sig;
+    size_t len;
+    size_t i;
+
+    /* A sequence of length 128, the shortest length using the long form. */
+    len = 0;
+    buf[len++] = 0x30;
+    buf[len++] = 0x81;
+    buf[len++] = 0x80;
+    len += der_long_form_body(buf + len);
+    CHECK(len == 131);
+    CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 1);
+    der_long_form_check(&sig);
+
+    /* The same, with the R integer's own length in the long form as well. */
+    len = 0;
+    buf[len++] = 0x30;
+    buf[len++] = 0x81;
+    buf[len++] = 0x87;
+    buf[len++] = 0x02;
+    buf[len++] = 0x81;
+    buf[len++] = 0x80;
+    for (i = 0; i < 0x80; i++) {
+        buf[len++] = 0x01;
+    }
+    buf[len++] = 0x02;
+    buf[len++] = 0x02;
+    buf[len++] = 0x01;
+    buf[len++] = 0x23;
+    CHECK(len == 138);
+    CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 1);
+    der_long_form_check(&sig);
+
+    /* Lengths below 128 must use the short form. */
+    len = 0;
+    buf[len++] = 0x30;
+    buf[len++] = 0x81;
+    buf[len++] = 0x46;
+    len += der_padded_integer(buf + len);
+    len += der_padded_integer(buf + len);
+    CHECK(len == 73);
+    CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 0);
+    /* The same body with a short form length is accepted, so the encoding of
+     * the length is the only reason the signature above is rejected. */
+    memmove(buf + 1, buf + 2, len - 2);
+    len--;
+    CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 1);
+
+    /* The long form length octets may not have a leading zero. */
+    len = 0;
+    buf[len++] = 0x30;
+    buf[len++] = 0x82;
+    buf[len++] = 0x00;
+    buf[len++] = 0x80;
+    len += der_long_form_body(buf + len);
+    CHECK(len == 132);
+    CHECK(secp256k1_ecdsa_signature_parse_der(CTX, &sig, buf, len) == 0);
+}
+
 /* Tests several edge cases. */
 static void run_ecdsa_edge_cases(void) {
     int t;
@@ -8105,6 +8221,7 @@ static const struct tf_test_entry tests_ecdsa[] = {
     CASE(pubkey_sort),
     CASE(random_pubkeys),
     CASE(ecdsa_der_parse),
+    CASE(ecdsa_der_parse_long_form),
     CASE(ecdsa_sign_verify),
     CASE(ecdsa_end_to_end),
     CASE(ecdsa_edge_cases),
