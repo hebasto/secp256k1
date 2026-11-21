@@ -4,6 +4,9 @@ runs:
   using: "composite"
   steps:
     - run: |
+        # Drop taps pre-installed on the runner image. They are
+        # unused and only produce unrelated errors and warnings.
+        brew untap hashicorp/tap aws/tap || true
         brew tap LouisBrunner/valgrind
         brew trust --formula LouisBrunner/valgrind/valgrind
         brew fetch --HEAD LouisBrunner/valgrind/valgrind
