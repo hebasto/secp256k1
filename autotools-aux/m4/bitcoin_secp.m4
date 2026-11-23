@@ -66,7 +66,11 @@ dnl Append flags to VAR if CC accepts them.
 AC_DEFUN([SECP_TRY_APPEND_CFLAGS], [
   AC_MSG_CHECKING([if ${CC} supports $1])
   SECP_TRY_APPEND_CFLAGS_saved_CFLAGS="$CFLAGS"
-  CFLAGS="$1 $CFLAGS"
+  dnl Some compilers (GCC) produce no diagnostic for -Wno-some-warning,
+  dnl if "some-warning" is unknown to the compiler and no other diagnostics
+  dnl are being produced. Therefore, test the -Wsome-warning case instead
+  dnl of the -Wno-some-warning one.
+  CFLAGS="m4_bpatsubst([$1], [-Wno-], [-W]) $CFLAGS"
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([[char foo;]])], [flag_works=yes], [flag_works=no])
   AC_MSG_RESULT($flag_works)
   CFLAGS="$SECP_TRY_APPEND_CFLAGS_saved_CFLAGS"
