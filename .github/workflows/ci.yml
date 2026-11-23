@@ -427,8 +427,6 @@ jobs:
 
     env:
       CC: 'clang'
-      HOMEBREW_NO_AUTO_UPDATE: 1
-      HOMEBREW_NO_INSTALL_CLEANUP: 1
       SYMBOL_CHECK: 'no'
 
     strategy:
@@ -446,6 +444,9 @@ jobs:
 
     steps:
       - *CHECKOUT
+
+      - name: Setup Homebrew
+        uses: ./.github/actions/setup-homebrew
 
       - name: Install Homebrew packages
         run: |
